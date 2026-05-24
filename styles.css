@@ -776,6 +776,17 @@ footer {
   transition: transform .18s ease, border-color .18s ease;
 }
 
+.project-cover {
+  width: 100%;
+  height: 160px;
+  display: block;
+  object-fit: cover;
+  margin-bottom: 14px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, .04);
+}
+
 .project-card .btn {
   margin-top: 14px;
 }

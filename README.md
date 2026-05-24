@@ -503,3 +503,9 @@ Entropy4761
 # License
 
 MIT
+
+---
+
+## Projects API Rendering
+
+前台项目控制台优先读取 `/api/projects`，只显示公开项目，并按 `sort_order ASC`、`created_at DESC` 排序。API 失败或没有项目数据时，才回退 `data/site.json` 的默认项目。

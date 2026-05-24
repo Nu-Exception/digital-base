@@ -238,27 +238,59 @@ async function loadMessages(data) {
   renderMessageList(messages);
 }
 
+function normalizeProject(project = {}) {
+  const url = String(project.url || project.link || "").trim();
+  const status = String(project.status || "").trim().toLowerCase();
+  return {
+    id: project.id,
+    title: project.title || project.name || "未命名项目",
+    description: project.description || project.body || "",
+    cover: project.cover || project.image || "",
+    url: url === "#" ? "" : url,
+    tags: normalizeArray(project.tags),
+    sort_order: Number(project.sort_order ?? 0),
+    is_public: Number(project.is_public ?? (["hidden", "private", "draft", "隐藏"].includes(status) ? 0 : 1)),
+    created_at: project.created_at || ""
+  };
+}
+
+function isExternalUrl(url = "") {
+  return /^https?:\/\//i.test(url);
+}
+
 function renderProjectsList(projects) {
-  $("#projectsGrid").innerHTML = projects.map((project) => {
-    const tags = normalizeArray(project.tags);
-    const title = project.title || project.name;
+  $("#projectsGrid").innerHTML = projects.map((rawProject) => {
+    const project = normalizeProject(rawProject);
+    const external = isExternalUrl(project.url);
     return `
       <article class="project-card">
-        <h3>${escapeHtml(title)}</h3>
+        ${project.cover ? `<img class="project-cover" src="${attr(project.cover)}" alt="${escapeHtml(project.title)}" loading="lazy" onerror="this.remove()" />` : ""}
+        <h3>${escapeHtml(project.title)}</h3>
         <p>${escapeHtml(project.description)}</p>
-        <div class="meta">${tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>
-        <a class="btn ghost" href="${attr(project.url)}"${project.url?.startsWith("#") ? "" : ' target="_blank" rel="noreferrer"'}>打开</a>
+        <div class="meta">${project.tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>
+        ${project.url ? `<a class="btn ghost" href="${attr(project.url)}"${external ? ' target="_blank" rel="noreferrer"' : ""}>打开</a>` : ""}
       </article>
     `;
   }).join("");
 }
 
 async function loadProjects(data) {
-  const projects = await tryApi("/api/projects", data.projects || [], (result) => {
-    const rows = result.projects || [];
-    return rows.length ? rows : data.projects || [];
-  });
-  renderProjectsList(projects);
+  try {
+    const result = await apiJson("/api/projects");
+    const rows = Array.isArray(result) ? result : (result.projects || []);
+    const projects = rows
+      .map(normalizeProject)
+      .filter((project) => project.is_public === 1)
+      .sort((a, b) => {
+        const orderDiff = a.sort_order - b.sort_order;
+        if (orderDiff) return orderDiff;
+        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+      });
+    renderProjectsList(rows.length ? projects : (data.projects || []));
+  } catch (error) {
+    console.warn("/api/projects 暂不可用，项目控制台使用 data/site.json 静态回退。", error);
+    renderProjectsList(data.projects || []);
+  }
 }
 
 function renderVideoList(videos, data) {
