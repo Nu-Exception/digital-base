@@ -131,10 +131,9 @@ export async function listItems(env, table, options = {}) {
     limit = 100,
     jsonFields = []
   } = options;
-  const where = !admin && publicOnly ? "WHERE is_public = 1" : "";
+  const where = !admin && publicOnly ? "WHERE COALESCE(is_public, 1) = 1" : "";
   const { results } = await env.DB.prepare(
     `SELECT * FROM ${table} ${where} ORDER BY ${order} LIMIT ?`
   ).bind(limit).all();
   return (results || []).map((row) => normalizeJsonArrays(row, jsonFields));
 }
-

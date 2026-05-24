@@ -4,8 +4,8 @@ import {
   deleteItem,
   getId,
   json,
-  listItems,
   methodNotAllowed,
+  normalizeJsonArrays,
   pickBody,
   readJson,
   requireAdmin,
@@ -48,20 +48,45 @@ export async function onRequestGet({ request, env }) {
   const dbError = requireDb(env);
   if (dbError) return dbError;
 
-  const url = new URL(request.url);
-  const admin = url.searchParams.get("admin") === "1";
-  if (admin) {
-    const authError = requireAdmin(request, env);
-    if (authError) return authError;
+  try {
+    const url = new URL(request.url);
+    const admin = url.searchParams.get("admin") === "1";
+    if (admin) {
+      const authError = requireAdmin(request, env);
+      if (authError) return authError;
+    }
+
+    const limit = Math.min(toInt(url.searchParams.get("limit"), 30), admin ? 200 : 50);
+    const where = admin ? "" : "WHERE COALESCE(is_public, 1) = 1";
+    const order = admin
+      ? "ORDER BY id DESC"
+      : "ORDER BY COALESCE(is_pinned, 0) DESC, datetime(created_at) DESC, id DESC";
+
+    const { results } = await env.DB.prepare(`
+      SELECT
+        id,
+        title,
+        body,
+        type,
+        images,
+        video_url,
+        tags,
+        COALESCE(is_public, 1) AS is_public,
+        COALESCE(is_pinned, 0) AS is_pinned,
+        created_at,
+        updated_at
+      FROM posts
+      ${where}
+      ${order}
+      LIMIT ?
+    `).bind(limit).all();
+
+    return json({
+      posts: (results || []).map((row) => normalizeJsonArrays(row, ["images", "tags"]))
+    });
+  } catch (error) {
+    return json({ error: error.message || String(error) }, 500);
   }
-  const limit = Math.min(toInt(url.searchParams.get("limit"), 30), admin ? 200 : 50);
-  const posts = await listItems(env, "posts", {
-    admin,
-    limit,
-    order: admin ? "id DESC" : "is_pinned DESC, datetime(created_at) DESC, id DESC",
-    jsonFields: ["images", "tags"]
-  });
-  return json({ posts });
 }
 
 export async function onRequestPost({ request, env }) {
