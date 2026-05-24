@@ -880,7 +880,7 @@ footer {
 
 .feed-media {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 8px;
 }
 
@@ -1182,6 +1182,10 @@ footer strong {
   .resource-card,
   .bookmark-card {
     min-height: auto;
+  }
+
+  .feed-media {
+    grid-template-columns: 1fr;
   }
 
   footer {

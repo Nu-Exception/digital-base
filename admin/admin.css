@@ -232,6 +232,12 @@ label span {
   font-weight: 850;
 }
 
+.field-help {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
 input,
 textarea,
 select,

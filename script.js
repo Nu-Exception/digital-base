@@ -361,7 +361,7 @@ function normalizePostForFeed(post) {
     title: post.title || "未命名动态",
     body: post.body || "",
     type: post.type || "文字",
-    images: normalizeArray(post.images).filter(Boolean),
+    images: normalizeArray(post.images).map((image) => String(image).trim()).filter(Boolean),
     video_url: post.video_url || "",
     tags: normalizeArray(post.tags).filter(Boolean),
     is_public: Number(post.is_public ?? 1),
@@ -381,7 +381,7 @@ function renderFeed(posts) {
         <time>${escapeHtml(formatDate(post.created_at))}${post.is_pinned ? " / 置顶" : ""}</time>
         <h3>${escapeHtml(post.title)}</h3>
         <p>${escapeHtml(post.body)}</p>
-        ${post.images.length ? `<div class="feed-media">${post.images.map((image) => `<img src="${attr(image)}" alt="${escapeHtml(post.title)}" loading="lazy" />`).join("")}</div>` : ""}
+        ${post.images.length ? `<div class="feed-media">${post.images.map((image) => `<img src="${attr(image)}" alt="${escapeHtml(post.title)}" loading="lazy" onerror="this.remove()" />`).join("")}</div>` : ""}
         ${post.video_url ? `<a class="feed-video" href="${attr(post.video_url)}" target="_blank" rel="noreferrer">打开视频链接</a>` : ""}
         <div class="meta">
           <span class="tag">${escapeHtml(post.type)}</span>

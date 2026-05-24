@@ -53,9 +53,14 @@ function normalizePost(row) {
 }
 
 const POST_TYPES = new Set(["文字", "图片", "视频", "文章"]);
+const IMAGE_EXT_RE = /\.(jpe?g|png|webp|gif)(\?.*)?$/i;
+
+function normalizeImages(value) {
+  return splitLines(value).filter((url) => /^https?:\/\//i.test(url) && IMAGE_EXT_RE.test(url));
+}
 
 const transforms = {
-  images: (value) => JSON.stringify(splitLines(value)),
+  images: (value) => JSON.stringify(normalizeImages(value)),
   tags: (value) => JSON.stringify(splitTags(value)),
   is_public: (value) => boolInt(value, 1),
   is_pinned: (value) => boolInt(value, 0)

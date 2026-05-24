@@ -16,9 +16,12 @@
 进入 `/admin` -> `动态管理`：
 
 - `编辑`：回填原动态内容，可修改 `title`、`body`、`type`、`images`、`video_url`、`tags`、`is_public`、`is_pinned`
+- `images`：填写外链图片地址，一行一个 URL，支持 `jpg`、`jpeg`、`png`、`webp`、`gif`
 - `删除`：会弹出确认框，确认后调用 `DELETE /api/posts?id=xxx`
 - `隐藏/显示`：切换 `is_public`
 - `置顶/取消置顶`：切换 `is_pinned`
+
+保存动态时，后台会把 `images` 写入 D1 `posts.images` 字段，格式是 JSON 数组字符串。前台读取 `/api/posts` 后会在动态卡片中展示这些外链图片；图片加载失败会自动隐藏，不影响页面。
 
 前台只显示 `is_public=1` 的动态，并按：
 

@@ -42,7 +42,7 @@ const configs = {
       ["title", "标题"],
       ["body", "正文", "textarea"],
       ["type", "类型", "select", ["文字", "图片", "视频", "文章"]],
-      ["images", "图片链接，换行分隔", "textarea"],
+      ["images", "图片链接，换行分隔", "textarea", null, "一行一个图片 URL，支持 jpg/png/webp/gif 外链。"],
       ["video_url", "视频链接"],
       ["tags", "标签，逗号分隔"],
       ["is_public", "显示", "checkbox"],
@@ -315,20 +315,21 @@ async function renderSiteSettings() {
   });
 }
 
-function renderField({ name, label, type = "text", value = "", options = [] }) {
+function renderField({ name, label, type = "text", value = "", options = [], help = "" }) {
   const full = type === "textarea" ? " full" : "";
+  const helpText = help ? `<small class="field-help">${escapeHtml(help)}</small>` : "";
   if (type === "textarea") {
-    return `<label class="${full}"><span>${label}</span><textarea name="${name}" rows="4">${escapeHtml(value)}</textarea></label>`;
+    return `<label class="${full}"><span>${label}</span><textarea name="${name}" rows="4">${escapeHtml(value)}</textarea>${helpText}</label>`;
   }
   if (type === "select") {
     return `<label><span>${label}</span><select name="${name}">${options.map((option) => `
       <option value="${escapeHtml(option)}" ${String(value) === option ? "selected" : ""}>${escapeHtml(option)}</option>
-    `).join("")}</select></label>`;
+    `).join("")}</select>${helpText}</label>`;
   }
   if (type === "checkbox") {
-    return `<label><span>${label}</span><input name="${name}" type="checkbox" ${Number(value ?? 1) ? "checked" : ""} /></label>`;
+    return `<label><span>${label}</span><input name="${name}" type="checkbox" ${Number(value ?? 1) ? "checked" : ""} />${helpText}</label>`;
   }
-  return `<label><span>${label}</span><input name="${name}" type="${type}" value="${escapeHtml(value ?? "")}" /></label>`;
+  return `<label><span>${label}</span><input name="${name}" type="${type}" value="${escapeHtml(value ?? "")}" />${helpText}</label>`;
 }
 
 function getInputValue(name) {
@@ -388,10 +389,10 @@ function renderForm(config, item = {}) {
     <form class="stack-form" id="resourceForm">
       <input type="hidden" name="id" value="${escapeHtml(item.id || "")}" />
       <div class="form-grid">
-        ${config.fields.map(([name, label, type, options]) => {
+        ${config.fields.map(([name, label, type, options, help]) => {
           let value = item[name];
           if (name === "tags" || name === "images") value = normalizeArray(value).join(name === "images" ? "\n" : ", ");
-          return renderField({ name, label, type, value, options });
+          return renderField({ name, label, type, value, options, help });
         }).join("")}
       </div>
       <div class="action-row">
