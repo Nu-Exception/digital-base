@@ -1,154 +1,323 @@
-# Digital Base V3 CMS
+# DIGITAL BASE V3
 
-暗黑游戏平台风格的个人数字空间。当前项目使用 Cloudflare Pages + Pages Functions + D1，不使用 React、Vue、Next.js，也不需要 npm 构建。
+> 一个持续搭建中的个人数字基地  
+> Cloudflare Pages + Functions + D1 驱动的赛博风个人网站
 
-## 当前功能
+---
 
-- 前台首页 Hero、轮播、动态墙、视频传送门、项目区、资源站、我的导航、朋友空间、留言板
-- `/admin` CMS 后台
-- 后台登录使用 `ADMIN_PASSWORD`
-- 所有后台写操作使用 `Authorization: Bearer <adminToken>`
-- 动态墙数据来源是 D1 `posts` 表，通过 `/api/posts` 读取
-- `data/site.json` 只作为 API 请求失败时的 fallback
+# 项目介绍
 
-## 后台动态管理
+Digital Base V3 是我目前正在长期维护的个人互动网站。
 
-进入 `/admin` -> `动态管理`：
+这个项目最开始只是一个简单主页，
+后来逐渐加入了：
 
-- `编辑`：回填原动态内容，可修改 `title`、`body`、`type`、`images`、`video_url`、`tags`、`is_public`、`is_pinned`
-- `images`：填写外链图片地址，一行一个 URL，支持 `jpg`、`jpeg`、`png`、`webp`、`gif`
-- `删除`：会弹出确认框，确认后调用 `DELETE /api/posts?id=xxx`
-- `隐藏/显示`：切换 `is_public`
-- `置顶/取消置顶`：切换 `is_pinned`
+- CMS 后台
+- 动态系统
+- 项目展示
+- 视频入口
+- 资源导航
+- 个人状态系统
+- 云函数 API
+- 数据库存储
 
-保存动态时，后台会把 `images` 写入 D1 `posts.images` 字段，格式是 JSON 数组字符串。前台读取 `/api/posts` 后会在动态卡片中展示这些外链图片；图片加载失败会自动隐藏，不影响页面。
+现在它更像一个：
 
-前台只显示 `is_public=1` 的动态，并按：
+> “属于自己的数字基地”
 
-```sql
-is_pinned DESC, created_at DESC
+这里会放：
+
+- 我做过的项目
+- 视频入口
+- 收藏资源
+- 游戏相关内容
+- AI 工具实验
+- 深夜灵感记录
+
+整个网站使用偏暗色、赛博、游戏 UI 风格设计，
+灵感来自：
+
+- 游戏大厅 UI
+- OBS 面板
+- 战术终端
+- 深夜电竞房氛围
+
+---
+
+# 技术栈
+
+## 前端
+
+- HTML5
+- CSS3
+- JavaScript
+
+## 云平台
+
+- Cloudflare Pages
+- Cloudflare Functions
+- Cloudflare D1
+
+## 数据系统
+
+- SQLite（D1）
+- REST API
+- JSON 数据结构
+
+---
+
+# 当前已实现功能
+
+## CMS 后台
+
+支持：
+
+- 首页内容修改
+- 动态发布
+- 项目管理
+- 视频入口管理
+- 资源站管理
+- 导航收藏管理
+
+后台可直接在线编辑，
+不需要重新改代码。
+
+---
+
+## 动态墙系统
+
+支持：
+
+- 文字动态
+- 图片动态
+- 标签分类
+- 置顶
+- 时间排序
+
+目前图片支持：
+
+- 外链图片
+- jpg/png/webp/gif
+
+---
+
+## 项目展示系统
+
+可展示：
+
+- GitHub 项目
+- 网站项目
+- 视频项目
+- 工具项目
+
+支持：
+
+- 封面图
+- 标签
+- 外链跳转
+- 排序
+
+---
+
+## 视频入口系统
+
+用于整合：
+
+- 视频主页
+- 剪辑入口
+- 回放入口
+- 收藏频道
+
+避免视频内容过于分散。
+
+---
+
+## 资源导航
+
+目前整理了：
+
+- Cloudflare
+- GitHub
+- ChatGPT
+- Steam
+- 工具站
+- 实验区
+
+后续会继续扩展。
+
+---
+
+# 项目特点
+
+## 游戏风 UI
+
+整个网站采用：
+
+- 暗色电竞风
+- 发光描边
+- HUD 风格模块
+- 卡片式布局
+- 赛博感动画
+
+而不是传统博客风。
+
+---
+
+## Cloudflare 全家桶部署
+
+项目目前运行于：
+
+- Cloudflare Pages
+- Functions
+- D1 Database
+
+特点：
+
+- 免费
+- 部署快
+- 全球 CDN
+- 适合个人项目
+
+---
+
+## 轻量 CMS
+
+这个项目最大的目标之一：
+
+> “不用传统服务器，也能拥有自己的内容后台”
+
+因此整个 CMS 都是轻量结构。
+
+---
+
+# 项目结构
+
+```bash
+/functions
+  /api
+  /lib
+
+/admin
+/assets
+/data
 ```
 
-排序。
+---
 
-## 首页设置
+# API 示例
 
-进入 `/admin` -> `首页设置`，可以修改：
+## 获取动态
 
-- `hero_kicker`
-- `hero_title`
-- `hero_description`
-- `hero_primary_button_text`
-- `hero_primary_button_link`
-- `hero_secondary_button_text`
-- `hero_secondary_button_link`
-- `hero_status_title`
-- `hero_status_description`
-- `hero_background_image`
-
-保存后写入 D1 `site_settings` 表。前台刷新后优先读取 `/api/site-settings`，失败才回退 `data/site.json`。
-
-## 轮播管理
-
-进入 `/admin` -> `轮播管理`：
-
-- 新增 / 编辑 / 删除轮播
-- 隐藏 / 显示
-- 使用 `sort_order` 控制排序
-
-前台优先读取 `/api/hero-slides`，只显示 `is_public=1`，并按 `sort_order ASC` 排序。D1 没有轮播数据时才回退 `data/site.json`。
-
-## 留言管理
-
-进入 `/admin` -> `留言管理`：
-
-- 显示全部留言
-- 支持隐藏 / 显示
-- 支持删除
-
-前台只显示 `is_public=1` 的留言。隐藏或删除后，前台刷新同步变化。
-
-## 同步测试
-
-动态墙：
-
-```txt
+```bash
 /api/posts
-/api/posts?debug=1
 ```
 
-首页设置：
+---
 
-```txt
+## 获取项目列表
+
+```bash
+/api/projects
+```
+
+---
+
+## 获取站点设置
+
+```bash
 /api/site-settings
 ```
 
-轮播：
+---
 
-```txt
-/api/hero-slides
-```
+# 本地运行
 
-如果 API 返回正确但前台没变，先等 Cloudflare Pages 部署完成，再强制刷新浏览器。前台和后台请求都已使用 `no-store`，正常不会继续读取旧缓存。
-
-## D1 升级 SQL
-
-新数据库可以直接执行 [schema.sql](./schema.sql)。
-
-已有数据库升级时，如果旧表没有这些字段，只执行一次：
-
-```sql
-ALTER TABLE posts ADD COLUMN is_public INTEGER NOT NULL DEFAULT 1;
-ALTER TABLE posts ADD COLUMN is_pinned INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE posts ADD COLUMN updated_at TEXT;
-ALTER TABLE messages ADD COLUMN is_public INTEGER NOT NULL DEFAULT 1;
-```
-
-D1/SQLite 对 `ALTER TABLE ADD COLUMN` 没有可靠的 `IF NOT EXISTS`，重复执行会报错。其余 `CREATE TABLE IF NOT EXISTS` 和 `CREATE INDEX IF NOT EXISTS` 可以按 [schema.sql](./schema.sql) 执行。
-
-## Cloudflare 设置
-
-Pages 设置：
-
-- Framework preset: `None`
-- Build command: 留空，或 `exit 0`
-- Build output directory: `/`
-- Production branch: `main`
-
-D1 绑定：
-
-1. Pages 项目 -> `Settings` -> `Bindings`
-2. 添加 `D1 database binding`
-3. Variable name 填 `DB`
-4. Production 和 Preview 都建议绑定同一个或对应数据库
-5. 保存后重新部署
-
-管理员密码：
-
-1. Pages 项目 -> `Settings` -> `Variables and Secrets`
-2. 新增：
-
-```txt
-ADMIN_PASSWORD=你的强密码
-```
-
-变量名必须是 `ADMIN_PASSWORD`。
-
-## 常见问题
-
-- 线上 API 空：检查 Production 环境是否绑定了 D1 的 `DB`
-- 预览环境异常：Preview 环境也要绑定 D1 和 `ADMIN_PASSWORD`
-- 后台无法写入：检查 `ADMIN_PASSWORD` 是否正确，重新登录 `/admin`
-- 修改后没生效：确认 `git push` 后 Cloudflare Pages 已完成部署
-- 前台不同步：直接访问 `/api/posts`、`/api/site-settings`、`/api/hero-slides` 看 API 返回
-
-## 更新线上
+## 克隆项目
 
 ```bash
-git status
-git add .
-git commit -m "stabilize cms management"
-git push
+git clone https://github.com/Nu-Exception/digital-base.git
 ```
 
-推送到 `main` 后，Cloudflare Pages 会自动重新部署。
+---
+
+## 进入目录
+
+```bash
+cd digital-base
+```
+
+---
+
+## 本地预览
+
+直接使用：
+
+```bash
+Live Server
+```
+
+或者：
+
+```bash
+npx wrangler pages dev .
+```
+
+---
+
+# 部署方式
+
+推荐直接部署到：
+
+## Cloudflare Pages
+
+连接 GitHub 后即可自动部署。
+
+---
+
+# 后续计划
+
+正在慢慢加入：
+
+- 朋友空间
+- AI 工具实验室
+- 多主题模式
+- 游戏数据展示
+- 更完整 CMS
+- 评论系统
+- 登录系统
+- 文件上传
+- 自定义组件
+
+---
+
+# 项目状态
+
+## 当前状态
+
+```txt
+ACTIVE DEVELOPMENT
+```
+
+这个项目仍然在持续更新。
+
+很多地方还在重构和优化。
+
+---
+
+# 作者
+
+## 松哥 / Nu-Exception
+
+正在学习：
+
+- 前端开发
+- Cloudflare Workers
+- UI 设计
+- AI 工具
+- 网站系统搭建
+
+---
+
+# License
+
+MIT
