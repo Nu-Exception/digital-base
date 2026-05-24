@@ -383,11 +383,21 @@ function fallbackPosts(data) {
 }
 
 async function loadPosts(data) {
-  const posts = await tryApi("/api/posts", fallbackPosts(data), (result) => {
-    const rows = result.posts || [];
-    return rows.length ? rows : fallbackPosts(data);
-  });
-  renderFeed(posts);
+  try {
+    const result = await apiJson("/api/posts");
+    const posts = Array.isArray(result.posts) ? result.posts : [];
+    const visiblePosts = posts
+      .filter((post) => Number(post.is_public ?? 1) === 1)
+      .sort((a, b) => {
+        const pinnedDiff = Number(b.is_pinned || 0) - Number(a.is_pinned || 0);
+        if (pinnedDiff) return pinnedDiff;
+        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+      });
+    renderFeed(visiblePosts);
+  } catch (error) {
+    console.warn("/api/posts 请求失败，动态墙使用 data/site.json 静态回退。", error);
+    renderFeed(fallbackPosts(data));
+  }
 }
 
 function bindMessageForm() {
