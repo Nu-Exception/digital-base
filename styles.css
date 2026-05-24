@@ -542,6 +542,7 @@ footer {
 .project-card:hover,
 .resource-card:hover,
 .bookmark-card:hover,
+.feed-card:hover,
 .friend-card:hover {
   transform: translateY(-3px);
   border-color: rgba(255, 255, 255, .24);
@@ -602,6 +603,8 @@ footer {
 .resource-card,
 .bookmark-card,
 .message,
+.message-form,
+.feed-card,
 .lab-panel {
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -835,6 +838,125 @@ footer {
   font-weight: 900;
 }
 
+.feed-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+
+.feed-card {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, .045), rgba(255, 255, 255, .018)), var(--panel);
+  transition: transform .18s ease, border-color .18s ease;
+}
+
+.feed-card time,
+.message time {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.feed-card h3 {
+  margin: 0;
+  font-size: 19px;
+}
+
+.feed-card p {
+  margin: 0;
+  color: #c1cbd8;
+  line-height: 1.7;
+  font-size: 13px;
+  white-space: pre-wrap;
+}
+
+.feed-media {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+
+.feed-media img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, .04);
+}
+
+.feed-video {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  border: 1px solid rgba(255, 207, 93, .38);
+  border-radius: 7px;
+  color: var(--accent);
+  background: rgba(255, 207, 93, .08);
+  font-size: 13px;
+  font-weight: 850;
+}
+
+.empty-state {
+  grid-column: 1 / -1;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  background: rgba(255, 255, 255, .035);
+}
+
+.guestbook-layout {
+  display: grid;
+  grid-template-columns: .8fr 1.2fr;
+  gap: 14px;
+}
+
+.message-form {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  padding: 16px;
+}
+
+.message-form label {
+  display: grid;
+  gap: 7px;
+}
+
+.message-form span {
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.message-form input,
+.message-form textarea {
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  outline: 0;
+  color: var(--text);
+  background: rgba(255, 255, 255, .055);
+  padding: 11px 12px;
+  font: inherit;
+  resize: vertical;
+}
+
+.message-form input:focus,
+.message-form textarea:focus {
+  border-color: rgba(255, 207, 93, .62);
+}
+
+.form-hint {
+  min-height: 20px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .message-wall {
   display: grid;
   gap: 10px;
@@ -842,7 +964,7 @@ footer {
 
 .message {
   display: grid;
-  grid-template-columns: 130px 1fr;
+  grid-template-columns: 130px 1fr auto;
   gap: 12px;
   padding: 13px;
 }
@@ -896,6 +1018,7 @@ footer strong {
   }
 
   .friend-cards,
+  .feed-grid,
   .bookmark-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -993,6 +1116,8 @@ footer strong {
   .module-grid,
   .friend-layout,
   .project-grid,
+  .feed-grid,
+  .guestbook-layout,
   .lab-panel {
     grid-template-columns: 1fr;
   }

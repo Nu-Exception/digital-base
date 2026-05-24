@@ -28,6 +28,7 @@
 
     <nav class="site-nav" id="siteNav" aria-label="主导航">
       <a href="#home">首页</a>
+      <a href="#feed">动态</a>
       <a href="#portal">视频入口</a>
       <a href="#status">状态</a>
       <a href="#friends">朋友</a>
@@ -42,13 +43,14 @@
   <aside class="float-menu" id="floatMenu" aria-label="页面快捷菜单">
     <div class="menu-title"><span></span> QUICK JUMP</div>
     <a href="#home"><b>01</b><em>首页</em></a>
-    <a href="#portal"><b>02</b><em>视频入口</em></a>
-    <a href="#status"><b>03</b><em>基地状态</em></a>
-    <a href="#friends"><b>04</b><em>朋友空间</em></a>
-    <a href="#projects"><b>05</b><em>项目控制台</em></a>
-    <a href="#resources"><b>06</b><em>资源站</em></a>
-    <a href="#bookmarks"><b>07</b><em>我的导航</em></a>
-    <a href="#guestbook"><b>08</b><em>留言板</em></a>
+    <a href="#feed"><b>02</b><em>动态墙</em></a>
+    <a href="#portal"><b>03</b><em>视频入口</em></a>
+    <a href="#status"><b>04</b><em>基地状态</em></a>
+    <a href="#friends"><b>05</b><em>朋友空间</em></a>
+    <a href="#projects"><b>06</b><em>项目控制台</em></a>
+    <a href="#resources"><b>07</b><em>资源站</em></a>
+    <a href="#bookmarks"><b>08</b><em>我的导航</em></a>
+    <a href="#guestbook"><b>09</b><em>留言板</em></a>
   </aside>
 
   <main>
@@ -83,6 +85,19 @@
         <a class="btn compact" id="mainVideoLink" href="#" target="_blank" rel="noreferrer">进入完整项目</a>
       </div>
       <div class="video-row" id="videoRow" aria-label="视频入口列表"></div>
+    </section>
+
+    <section class="section feed-section" id="feed">
+      <div class="section-head inline-head">
+        <div>
+          <p>LIVE FEED</p>
+          <h2>动态墙</h2>
+        </div>
+        <span class="section-note">来自 D1 的发布内容，按发布时间倒序</span>
+      </div>
+      <div class="feed-grid" id="dynamicFeed">
+        <div class="empty-state">正在读取动态...</div>
+      </div>
     </section>
 
     <section class="section module-zone" aria-label="首页模块">
@@ -157,7 +172,21 @@
         <p>GUESTBOOK</p>
         <h2>留言板</h2>
       </div>
-      <div class="message-wall" id="messages"></div>
+      <div class="guestbook-layout">
+        <form class="message-form" id="messageForm">
+          <label>
+            <span>昵称</span>
+            <input id="messageName" name="nickname" maxlength="24" placeholder="你的名字" required />
+          </label>
+          <label>
+            <span>留言</span>
+            <textarea id="messageText" name="content" rows="4" maxlength="500" placeholder="写点什么..." required></textarea>
+          </label>
+          <button class="btn primary" type="submit">发布留言</button>
+          <p class="form-hint" id="messageFormHint"></p>
+        </form>
+        <div class="message-wall" id="messages"></div>
+      </div>
     </section>
 
     <section class="section lab" id="lab">

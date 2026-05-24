@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Base Admin</title>
+  <link rel="stylesheet" href="./admin.css" />
+</head>
+<body>
+  <main class="admin-shell">
+    <section class="admin-hero">
+      <a class="back-link" href="/">返回首页</a>
+      <p>DIGITAL BASE ADMIN</p>
+      <h1>基地发布后台</h1>
+      <span>使用 Cloudflare Pages Functions + D1。管理员密码来自环境变量 ADMIN_PASSWORD。</span>
+    </section>
+
+    <section class="panel" id="loginPanel">
+      <div class="panel-head">
+        <p>LOGIN</p>
+        <h2>管理员登录</h2>
+      </div>
+      <form id="loginForm" class="stack-form">
+        <label>
+          <span>管理员密码</span>
+          <input type="password" id="adminPassword" autocomplete="current-password" required />
+        </label>
+        <button type="submit">进入后台</button>
+        <p class="hint" id="loginHint"></p>
+      </form>
+    </section>
+
+    <section class="panel hidden" id="editorPanel">
+      <div class="panel-head inline">
+        <div>
+          <p>PUBLISH</p>
+          <h2>发布动态</h2>
+        </div>
+        <button class="ghost-btn" id="logoutBtn" type="button">退出</button>
+      </div>
+
+      <form id="postForm" class="stack-form">
+        <label>
+          <span>标题</span>
+          <input id="postTitle" maxlength="120" required />
+        </label>
+
+        <label>
+          <span>正文</span>
+          <textarea id="postBody" rows="8" required></textarea>
+        </label>
+
+        <label>
+          <span>类型</span>
+          <select id="postType">
+            <option>文字</option>
+            <option>图片</option>
+            <option>视频</option>
+            <option>文章</option>
+          </select>
+        </label>
+
+        <label>
+          <span>图片链接</span>
+          <textarea id="postImages" rows="4" placeholder="多个图片链接用换行分隔"></textarea>
+        </label>
+
+        <label>
+          <span>视频链接</span>
+          <input id="postVideo" placeholder="https://..." />
+        </label>
+
+        <label>
+          <span>标签</span>
+          <input id="postTags" placeholder="游戏, 日常, 网站更新" />
+        </label>
+
+        <button type="submit">发布到动态墙</button>
+        <p class="hint" id="postHint"></p>
+      </form>
+    </section>
+
+    <section class="panel hidden" id="previewPanel">
+      <div class="panel-head">
+        <p>RECENT</p>
+        <h2>最近动态</h2>
+      </div>
+      <div class="post-list" id="postList"></div>
+    </section>
+  </main>
+
+  <script src="./admin.js"></script>
+</body>
+</html>

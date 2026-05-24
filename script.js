@@ -94,6 +94,18 @@ function renderStatus(data) {
   `).join("");
 }
 
+async function apiJson(url, options) {
+  const res = await fetch(url, {
+    headers: { "Content-Type": "application/json" },
+    ...options
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    throw new Error(data.error || `请求失败：${res.status}`);
+  }
+  return data;
+}
+
 function renderQuickLinks(data) {
   $("#quickLinks").innerHTML = (data.quickLinks || []).map((item) => `
     <a href="${attr(item.url)}"${item.external ? ' target="_blank" rel="noreferrer"' : ""}>
@@ -116,12 +128,35 @@ function renderFriends(data) {
 }
 
 function renderMessages(data) {
-  $("#messages").innerHTML = (data.messages || []).map((message) => `
+  renderMessageList(data.messages || []);
+}
+
+function renderMessageList(messages) {
+  $("#messages").innerHTML = messages.length ? messages.map((message) => `
     <div class="message">
       <strong>${escapeHtml(message.name)}</strong>
       <p>${escapeHtml(message.text)}</p>
+      ${message.created_at ? `<time>${formatDate(message.created_at)}</time>` : ""}
     </div>
-  `).join("");
+  `).join("") : '<div class="empty-state">还没有留言，来抢第一条。</div>';
+}
+
+function normalizeApiMessage(message) {
+  return {
+    name: message.nickname || message.name || "访客",
+    text: message.content || message.text || "",
+    created_at: message.created_at || ""
+  };
+}
+
+async function loadMessages(data) {
+  try {
+    const result = await apiJson("/api/messages");
+    renderMessageList((result.messages || []).map(normalizeApiMessage));
+  } catch (error) {
+    console.warn("留言接口暂不可用，使用静态数据。", error);
+    renderMessages(data);
+  }
 }
 
 function renderProjects(data) {
@@ -196,6 +231,98 @@ function renderBookmarks(data) {
   `).join("");
 }
 
+function formatDate(value) {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return date.toLocaleString("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit"
+  });
+}
+
+function normalizeArray(value) {
+  if (Array.isArray(value)) return value;
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function renderFeed(posts) {
+  const feed = $("#dynamicFeed");
+  if (!feed) return;
+  feed.innerHTML = posts.length ? posts.map((post) => {
+    const images = normalizeArray(post.images).filter(Boolean);
+    const tags = normalizeArray(post.tags).filter(Boolean);
+    return `
+      <article class="feed-card">
+        <time>${escapeHtml(formatDate(post.created_at))}</time>
+        <h3>${escapeHtml(post.title)}</h3>
+        <p>${escapeHtml(post.body || post.description || "")}</p>
+        ${images.length ? `<div class="feed-media">${images.map((image) => `<img src="${attr(image)}" alt="${escapeHtml(post.title)}" loading="lazy" />`).join("")}</div>` : ""}
+        ${post.video_url ? `<a class="feed-video" href="${attr(post.video_url)}" target="_blank" rel="noreferrer">打开视频链接</a>` : ""}
+        ${tags.length ? `<div class="meta">${tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>` : ""}
+      </article>
+    `;
+  }).join("") : '<div class="empty-state">还没有发布动态。登录后台后，可以先发第一条。</div>';
+}
+
+function fallbackPosts(data) {
+  return (data.updates || []).map((item, index) => ({
+    id: `fallback-${index}`,
+    title: item.title || item.time || "动态",
+    body: item.description || item.text || "",
+    type: "文字",
+    images: [],
+    tags: ["本地预览"],
+    created_at: item.time || ""
+  }));
+}
+
+async function loadPosts(data) {
+  try {
+    const result = await apiJson("/api/posts");
+    renderFeed(result.posts || []);
+  } catch (error) {
+    console.warn("动态接口暂不可用，使用静态数据。", error);
+    renderFeed(fallbackPosts(data));
+  }
+}
+
+function bindMessageForm() {
+  const form = $("#messageForm");
+  if (!form) return;
+
+  form.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const hint = $("#messageFormHint");
+    const nickname = $("#messageName").value.trim();
+    const content = $("#messageText").value.trim();
+    if (!nickname || !content) return;
+
+    hint.textContent = "正在发布...";
+    try {
+      await apiJson("/api/messages", {
+        method: "POST",
+        body: JSON.stringify({ nickname, content })
+      });
+      hint.textContent = "留言已发布。";
+      form.reset();
+      await loadMessages(siteData);
+    } catch (error) {
+      hint.textContent = "留言接口暂不可用，请确认 D1 已绑定。";
+      console.error(error);
+    }
+  });
+}
+
 function setFloatMenu() {
   const menu = $("#floatMenu");
   const update = () => menu.classList.toggle("visible", window.scrollY > 420 && window.innerWidth > 860);
@@ -264,7 +391,8 @@ getData()
     renderStatus(data);
     renderQuickLinks(data);
     renderFriends(data);
-    renderMessages(data);
+    loadPosts(data);
+    loadMessages(data);
     renderProjects(data);
     renderVideos(data);
     renderResources(data);
@@ -272,6 +400,7 @@ getData()
     renderBookmarks(data);
     setFloatMenu();
     bindMobileMenu();
+    bindMessageForm();
     bindBaseMode();
     setActiveAnchors();
     checkLocalLinks();
