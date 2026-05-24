@@ -135,21 +135,3 @@ CREATE TABLE IF NOT EXISTS friends (
 );
 
 CREATE INDEX IF NOT EXISTS idx_friends_sort ON friends (is_public, sort_order ASC, id DESC);
-
-CREATE TABLE IF NOT EXISTS media_assets (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  url TEXT NOT NULL,
-  key TEXT,
-  filename TEXT,
-  original_name TEXT,
-  mime_type TEXT,
-  size INTEGER NOT NULL DEFAULT 0,
-  source TEXT NOT NULL CHECK (source IN ('r2', 'external')),
-  category TEXT NOT NULL DEFAULT 'other' CHECK (category IN ('post', 'hero', 'slide', 'project', 'resource', 'avatar', 'gallery', 'other')),
-  alt TEXT,
-  caption TEXT,
-  created_at TEXT NOT NULL DEFAULT (datetime('now'))
-);
-
-CREATE INDEX IF NOT EXISTS idx_media_assets_category ON media_assets (category, created_at DESC);
-CREATE INDEX IF NOT EXISTS idx_media_assets_created_at ON media_assets (created_at DESC);

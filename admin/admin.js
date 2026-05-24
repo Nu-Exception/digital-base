@@ -12,22 +12,9 @@ const navItems = [
   ["resources", "资源站"],
   ["bookmarks", "我的导航"],
   ["friends", "朋友空间"],
-  ["media", "媒体库"],
   ["front", "返回前台"],
   ["logout", "退出登录"]
 ];
-
-const mediaCategories = ["post", "hero", "slide", "project", "resource", "avatar", "gallery", "other"];
-const mediaCategoryLabels = {
-  post: "动态",
-  hero: "首页",
-  slide: "轮播",
-  project: "项目",
-  resource: "资源站",
-  avatar: "头像",
-  gallery: "图库",
-  other: "其他"
-};
 
 const configs = {
   heroSlides: {
@@ -188,15 +175,6 @@ async function apiJson(url, options = {}) {
   return data;
 }
 
-async function apiForm(url, formData) {
-  const headers = {};
-  if (getToken()) headers.Authorization = `Bearer ${getToken()}`;
-  const res = await fetch(url, { method: "POST", headers, body: formData, cache: "no-store" });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw new Error(data.error || `请求失败：${res.status}`);
-  return data;
-}
-
 function escapeHtml(value = "") {
   return String(value)
     .replaceAll("&", "&amp;")
@@ -215,78 +193,6 @@ function normalizeArray(value) {
   } catch {
     return String(value).split(",").map((item) => item.trim()).filter(Boolean);
   }
-}
-
-function getMediaFieldMeta(name, sectionKey = "") {
-  if (name === "images") return { category: "post", multi: true };
-  if (name === "hero_background_image") return { category: "hero", multi: false };
-  if (name === "image") return { category: "slide", multi: false };
-  if (name === "cover") return { category: sectionKey === "videos" ? "gallery" : "project", multi: false };
-  if (name === "icon") return { category: "resource", multi: false };
-  if (name === "avatar") return { category: "avatar", multi: false };
-  return null;
-}
-
-function renderMediaTools(name, sectionKey = "") {
-  const meta = getMediaFieldMeta(name, sectionKey);
-  if (!meta) return "";
-  return `
-    <div class="media-tools" data-field="${escapeHtml(name)}" data-category="${escapeHtml(meta.category)}" data-multi="${meta.multi ? "1" : "0"}">
-      <button class="tiny-btn" type="button" data-media-action="upload">上传图片</button>
-      <button class="tiny-btn ghost-btn" type="button" data-media-action="pick">从媒体库选择</button>
-      <input class="media-file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" hidden />
-    </div>
-  `;
-}
-
-function setMediaFieldValue(fieldName, url, multi = false) {
-  const field = $(`[name="${fieldName}"]`);
-  if (!field) return;
-  if (multi) {
-    const current = field.value.trim();
-    field.value = current ? `${current}\n${url}` : url;
-  } else {
-    field.value = url;
-  }
-  field.dispatchEvent(new Event("input", { bubbles: true }));
-}
-
-function formatBytes(size = 0) {
-  const value = Number(size) || 0;
-  if (value >= 1024 * 1024) return `${(value / 1024 / 1024).toFixed(1)} MB`;
-  if (value >= 1024) return `${(value / 1024).toFixed(1)} KB`;
-  return `${value} B`;
-}
-
-async function copyText(text) {
-  if (navigator.clipboard?.writeText) {
-    await navigator.clipboard.writeText(text);
-    return;
-  }
-  const input = document.createElement("textarea");
-  input.value = text;
-  input.style.position = "fixed";
-  input.style.opacity = "0";
-  document.body.appendChild(input);
-  input.select();
-  document.execCommand("copy");
-  input.remove();
-}
-
-
-function renderCategoryOptions(active = "", includeAll = false) {
-  return `${includeAll ? '<option value="">全部分类</option>' : ""}${mediaCategories.map((category) => `
-    <option value="${category}" ${active === category ? "selected" : ""}>${mediaCategoryLabels[category]}</option>
-  `).join("")}`;
-}
-
-async function uploadMediaFile(file, category = "other", alt = "", caption = "") {
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("category", category);
-  formData.append("alt", alt);
-  formData.append("caption", caption);
-  return apiForm("/api/upload", formData);
 }
 
 function formatDate(value) {
@@ -385,7 +291,7 @@ async function renderSiteSettings() {
   sectionShell("HOME", "首页设置", `
     <form class="stack-form" id="siteForm">
       <div class="form-grid">
-        ${fields.map(([name, label, type]) => renderField({ name, label, type, value: s[name] || "", sectionKey: "site" })).join("")}
+        ${fields.map(([name, label, type]) => renderField({ name, label, type, value: s[name] || "" })).join("")}
       </div>
       <button type="submit">保存首页设置</button>
       <p class="hint" id="siteHint"></p>
@@ -407,24 +313,22 @@ async function renderSiteSettings() {
       }
     });
   });
-  bindMediaTools();
 }
 
-function renderField({ name, label, type = "text", value = "", options = [], sectionKey = "" }) {
+function renderField({ name, label, type = "text", value = "", options = [] }) {
   const full = type === "textarea" ? " full" : "";
-  const tools = renderMediaTools(name, sectionKey);
   if (type === "textarea") {
-    return `<div class="field-wrap${full}"><label><span>${label}</span><textarea name="${name}" rows="4">${escapeHtml(value)}</textarea></label>${tools}</div>`;
+    return `<label class="${full}"><span>${label}</span><textarea name="${name}" rows="4">${escapeHtml(value)}</textarea></label>`;
   }
   if (type === "select") {
-    return `<div class="field-wrap"><label><span>${label}</span><select name="${name}">${options.map((option) => `
+    return `<label><span>${label}</span><select name="${name}">${options.map((option) => `
       <option value="${escapeHtml(option)}" ${String(value) === option ? "selected" : ""}>${escapeHtml(option)}</option>
-    `).join("")}</select></label>${tools}</div>`;
+    `).join("")}</select></label>`;
   }
   if (type === "checkbox") {
-    return `<div class="field-wrap"><label><span>${label}</span><input name="${name}" type="checkbox" ${Number(value ?? 1) ? "checked" : ""} /></label>${tools}</div>`;
+    return `<label><span>${label}</span><input name="${name}" type="checkbox" ${Number(value ?? 1) ? "checked" : ""} /></label>`;
   }
-  return `<div class="field-wrap"><label><span>${label}</span><input name="${name}" type="${type}" value="${escapeHtml(value ?? "")}" /></label>${tools}</div>`;
+  return `<label><span>${label}</span><input name="${name}" type="${type}" value="${escapeHtml(value ?? "")}" /></label>`;
 }
 
 function getInputValue(name) {
@@ -479,7 +383,7 @@ function renderMessageItem(item) {
   `;
 }
 
-function renderForm(config, item = {}, sectionKey = "") {
+function renderForm(config, item = {}) {
   return `
     <form class="stack-form" id="resourceForm">
       <input type="hidden" name="id" value="${escapeHtml(item.id || "")}" />
@@ -487,7 +391,7 @@ function renderForm(config, item = {}, sectionKey = "") {
         ${config.fields.map(([name, label, type, options]) => {
           let value = item[name];
           if (name === "tags" || name === "images") value = normalizeArray(value).join(name === "images" ? "\n" : ", ");
-          return renderField({ name, label, type, value, options, sectionKey });
+          return renderField({ name, label, type, value, options });
         }).join("")}
       </div>
       <div class="action-row">
@@ -503,11 +407,10 @@ async function renderResourceManager(key) {
   const config = configs[key];
   const editing = state.editing[key] || null;
   sectionShell("CMS", config.title, `
-    <div class="card">${renderForm(config, editing || {}, key)}</div>
+    <div class="card">${renderForm(config, editing || {})}</div>
     <div class="list" id="resourceList"></div>
   `);
   bindResourceForm(key);
-  bindMediaTools();
   await refreshResourceList(key);
 }
 
@@ -606,199 +509,6 @@ async function refreshResourceList(key) {
   };
 }
 
-function bindMediaTools(root = $("#cmsMain")) {
-  root?.querySelectorAll(".media-tools").forEach((tools) => {
-    const fileInput = tools.querySelector(".media-file");
-    const field = tools.dataset.field;
-    const category = tools.dataset.category || "other";
-    const multi = tools.dataset.multi === "1";
-
-    tools.querySelector('[data-media-action="upload"]')?.addEventListener("click", () => fileInput.click());
-    tools.querySelector('[data-media-action="pick"]')?.addEventListener("click", () => {
-      openMediaPicker({ field, category, multi }).catch((error) => notify(`媒体库打开失败：${error.message}`, "bad"));
-    });
-    fileInput?.addEventListener("change", async () => {
-      const file = fileInput.files?.[0];
-      if (!file) return;
-      try {
-        notify("图片上传中...");
-        const data = await uploadMediaFile(file, category);
-        setMediaFieldValue(field, data.url || data.key, multi);
-        notify(data.needs_public_base_url ? "上传成功，但还需要配置 PUBLIC_ASSET_BASE_URL 才能公开访问。" : "图片上传成功，已填入表单。", "ok");
-      } catch (error) {
-        notify(`上传失败：${error.message}`, "bad");
-      } finally {
-        fileInput.value = "";
-      }
-    });
-  });
-}
-
-async function openMediaPicker({ field, category = "", multi = false }) {
-  const old = $(".media-modal");
-  if (old) old.remove();
-  const data = await apiJson(`/api/media?category=${encodeURIComponent(category)}&limit=120`);
-  const assets = data.media || [];
-  document.body.insertAdjacentHTML("beforeend", `
-    <div class="media-modal" role="dialog" aria-modal="true">
-      <div class="media-dialog">
-        <div class="section-title">
-          <div>
-            <p>MEDIA PICKER</p>
-            <h2>选择图片</h2>
-          </div>
-          <button class="tiny-btn ghost-btn" type="button" data-close-media>关闭</button>
-        </div>
-        <div class="media-grid picker-grid">
-          ${assets.map((asset) => renderMediaCard(asset, true)).join("") || "<p class='hint'>这个分类还没有图片。</p>"}
-        </div>
-      </div>
-    </div>
-  `);
-
-  const modal = $(".media-modal");
-  modal.addEventListener("click", (event) => {
-    if (event.target === modal || event.target.closest("[data-close-media]")) {
-      modal.remove();
-      return;
-    }
-    const button = event.target.closest("[data-pick-url]");
-    if (!button) return;
-    setMediaFieldValue(field, button.dataset.pickUrl, multi);
-    notify("已从媒体库填入图片。", "ok");
-    modal.remove();
-  });
-}
-
-function renderMediaCard(asset, picker = false) {
-  const imageAlt = asset.alt || asset.original_name || asset.filename || "media";
-  return `
-    <article class="media-card">
-      <div class="media-thumb">
-        <img src="${escapeHtml(asset.url)}" alt="${escapeHtml(imageAlt)}" loading="lazy" onerror="this.parentElement.classList.add('broken')" />
-      </div>
-      <div class="media-info">
-        <strong>${escapeHtml(asset.caption || asset.original_name || asset.filename || asset.key || "未命名图片")}</strong>
-        <span>${escapeHtml(mediaCategoryLabels[asset.category] || asset.category || "其他")} / ${escapeHtml(asset.source || "")}</span>
-        <span>${formatBytes(asset.size)} / ${formatDate(asset.created_at)}</span>
-      </div>
-      <div class="action-row">
-        ${picker ? `<button class="tiny-btn" type="button" data-pick-url="${escapeHtml(asset.url)}">选择</button>` : ""}
-        <button class="tiny-btn ghost-btn" type="button" data-copy-url="${escapeHtml(asset.url)}">复制 URL</button>
-        ${picker ? "" : `<button class="tiny-btn danger-btn" type="button" data-delete-media="${asset.id}">删除</button>`}
-      </div>
-    </article>
-  `;
-}
-
-async function renderMediaManager() {
-  sectionShell("MEDIA", "媒体库", `
-    <div class="two-col">
-      <div class="card">
-        <div class="panel-head"><p>UPLOAD</p><h2>上传图片到 R2</h2></div>
-        <form class="stack-form" id="uploadForm">
-          <input name="file" type="file" accept="image/jpeg,image/png,image/webp,image/gif" required />
-          <select name="category">${renderCategoryOptions("other")}</select>
-          <input name="alt" placeholder="alt 文本" />
-          <textarea name="caption" rows="2" placeholder="图片说明"></textarea>
-          <button type="submit">上传图片</button>
-          <p class="hint" id="uploadHint"></p>
-        </form>
-      </div>
-      <div class="card">
-        <div class="panel-head"><p>EXTERNAL</p><h2>添加外链图片</h2></div>
-        <form class="stack-form" id="externalMediaForm">
-          <input name="url" placeholder="https://..." required />
-          <select name="category">${renderCategoryOptions("other")}</select>
-          <input name="alt" placeholder="alt 文本" />
-          <textarea name="caption" rows="2" placeholder="图片说明"></textarea>
-          <button type="submit">保存外链图片</button>
-          <p class="hint" id="externalMediaHint"></p>
-        </form>
-      </div>
-    </div>
-    <div class="card">
-      <div class="media-toolbar">
-        <div class="panel-head"><p>LIBRARY</p><h2>图片列表</h2></div>
-        <select id="mediaCategoryFilter">${renderCategoryOptions("", true)}</select>
-      </div>
-      <div class="media-grid" id="mediaList"></div>
-    </div>
-  `);
-
-  $("#uploadForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const button = event.submitter || $("#uploadForm button[type='submit']");
-    const form = event.currentTarget;
-    const file = form.elements.file.files?.[0];
-    if (!file) return;
-    await withButtonLoading(button, "上传中...", async () => {
-      try {
-        const data = await uploadMediaFile(file, form.elements.category.value, form.elements.alt.value, form.elements.caption.value);
-        setHint($("#uploadHint"), data.needs_public_base_url ? "上传成功，但需要配置 PUBLIC_ASSET_BASE_URL 才能公开访问。" : "上传成功。", "ok");
-        form.reset();
-        await refreshMediaList();
-      } catch (error) {
-        setHint($("#uploadHint"), error.message, "bad");
-      }
-    });
-  });
-
-  $("#externalMediaForm").addEventListener("submit", async (event) => {
-    event.preventDefault();
-    const button = event.submitter || $("#externalMediaForm button[type='submit']");
-    const form = event.currentTarget;
-    const payload = {
-      url: form.elements.url.value,
-      category: form.elements.category.value,
-      alt: form.elements.alt.value,
-      caption: form.elements.caption.value
-    };
-    await withButtonLoading(button, "保存中...", async () => {
-      try {
-        await apiJson("/api/media", { method: "POST", body: JSON.stringify(payload) });
-        setHint($("#externalMediaHint"), "外链图片已保存。", "ok");
-        form.reset();
-        await refreshMediaList();
-      } catch (error) {
-        setHint($("#externalMediaHint"), error.message, "bad");
-      }
-    });
-  });
-
-  $("#mediaCategoryFilter").addEventListener("change", () => {
-    refreshMediaList().catch((error) => notify(`媒体库读取失败：${error.message}`, "bad"));
-  });
-  await refreshMediaList().catch((error) => notify(`媒体库读取失败：${error.message}`, "bad"));
-}
-
-async function refreshMediaList() {
-  const category = $("#mediaCategoryFilter")?.value || "";
-  const data = await apiJson(`/api/media?category=${encodeURIComponent(category)}&limit=200`);
-  const assets = data.media || [];
-  $("#mediaList").innerHTML = assets.map((asset) => renderMediaCard(asset)).join("") || "<p class='hint'>暂无图片</p>";
-  $("#mediaList").onclick = async (event) => {
-    const copyButton = event.target.closest("[data-copy-url]");
-    if (copyButton) {
-      await copyText(copyButton.dataset.copyUrl);
-      notify("URL 已复制。", "ok");
-      return;
-    }
-    const deleteButton = event.target.closest("[data-delete-media]");
-    if (!deleteButton) return;
-    if (!confirm("确认删除这张图片？R2 图片会同时删除文件。")) return;
-    await withButtonLoading(deleteButton, "删除中...", async () => {
-      try {
-        await apiJson(`/api/media?id=${encodeURIComponent(deleteButton.dataset.deleteMedia)}`, { method: "DELETE" });
-        notify("图片已删除。", "ok");
-        await refreshMediaList();
-      } catch (error) {
-        notify(`删除失败：${error.message}`, "bad");
-      }
-    });
-  };
-}
-
 async function renderMessagesManager() {
   sectionShell("CMS", "留言管理", '<div class="list" id="messageList"></div>');
   const data = await apiJson("/api/messages?admin=1&limit=200");
@@ -853,7 +563,6 @@ async function renderSection(key) {
     if (key === "dashboard") return renderDashboard();
     if (key === "site") return renderSiteSettings();
     if (key === "messages") return renderMessagesManager();
-    if (key === "media") return renderMediaManager();
     return renderResourceManager(key);
   } catch (error) {
     sectionShell("ERROR", "读取失败", `<p class="hint bad">${escapeHtml(error.message)}</p>`);
