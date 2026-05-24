@@ -44,6 +44,10 @@ function attr(value = "") {
   return escapeHtml(value);
 }
 
+function looksLikeImage(value = "") {
+  return /^https?:\/\//i.test(String(value)) || String(value).startsWith("uploads/");
+}
+
 function normalizeArray(value) {
   if (Array.isArray(value)) return value;
   if (!value) return [];
@@ -195,7 +199,7 @@ function renderQuickLinks(data) {
 function renderFriendsList(friends) {
   $("#friendCards").innerHTML = friends.map((friend) => `
     <article class="friend-card">
-      <div class="avatar">${friend.avatar ? `<img src="${attr(friend.avatar)}" alt="${escapeHtml(friend.name)}" />` : escapeHtml(friend.name || "?").slice(0, 1)}</div>
+      <div class="avatar">${friend.avatar ? `<img src="${attr(friend.avatar)}" alt="${escapeHtml(friend.name)}" loading="lazy" onerror="this.remove()" />` : escapeHtml(friend.name || "?").slice(0, 1)}</div>
       <h3>${escapeHtml(friend.name)}</h3>
       <p>${escapeHtml(friend.status)}</p>
       <span class="tag">${escapeHtml(friend.tag || "FRIEND")}</span>
@@ -244,6 +248,7 @@ function renderProjectsList(projects) {
     const title = project.title || project.name;
     return `
       <article class="project-card">
+        ${project.cover ? `<img class="project-cover" src="${attr(project.cover)}" alt="${escapeHtml(title)}" loading="lazy" onerror="this.remove()" />` : ""}
         <h3>${escapeHtml(title)}</h3>
         <p>${escapeHtml(project.description)}</p>
         <div class="meta">${tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>
@@ -295,7 +300,7 @@ function renderResourcesList(resources) {
     const title = resource.title || resource.name;
     return `
       <a class="resource-card" href="${attr(resource.url)}"${resource.url?.startsWith("#") ? "" : ' target="_blank" rel="noreferrer"'}>
-        <div class="icon">${escapeHtml(resource.icon || "IN")}</div>
+        <div class="icon">${looksLikeImage(resource.icon) ? `<img src="${attr(resource.icon)}" alt="${escapeHtml(title)}" loading="lazy" onerror="this.remove()" />` : escapeHtml(resource.icon || "IN")}</div>
         <h3>${escapeHtml(title)}</h3>
         <p>${escapeHtml(resource.description)}</p>
       </a>
@@ -330,6 +335,7 @@ function renderBookmarkList(bookmarks) {
     const title = bookmark.title || bookmark.name;
     return `
       <a class="bookmark-card" href="${attr(bookmark.url)}"${bookmark.url?.startsWith("#") ? "" : ' target="_blank" rel="noreferrer"'}>
+        ${bookmark.icon ? `<span class="bookmark-icon">${looksLikeImage(bookmark.icon) ? `<img src="${attr(bookmark.icon)}" alt="${escapeHtml(title)}" loading="lazy" onerror="this.remove()" />` : escapeHtml(bookmark.icon)}</span>` : ""}
         <small>${escapeHtml(bookmark.category)}</small>
         <h3>${escapeHtml(title)}</h3>
         <p>${escapeHtml(bookmark.description)}</p>
@@ -381,7 +387,7 @@ function renderFeed(posts) {
         <time>${escapeHtml(formatDate(post.created_at))}${post.is_pinned ? " / 置顶" : ""}</time>
         <h3>${escapeHtml(post.title)}</h3>
         <p>${escapeHtml(post.body)}</p>
-        ${post.images.length ? `<div class="feed-media">${post.images.map((image) => `<img src="${attr(image)}" alt="${escapeHtml(post.title)}" loading="lazy" />`).join("")}</div>` : ""}
+        ${post.images.length ? `<div class="feed-media">${post.images.map((image) => `<button class="image-preview-btn" type="button" data-preview="${attr(image)}" aria-label="放大预览图片"><img src="${attr(image)}" alt="${escapeHtml(post.title)}" loading="lazy" onerror="this.style.opacity=0;this.closest('.image-preview-btn').classList.add('is-broken')" /></button>`).join("")}</div>` : ""}
         ${post.video_url ? `<a class="feed-video" href="${attr(post.video_url)}" target="_blank" rel="noreferrer">打开视频链接</a>` : ""}
         <div class="meta">
           <span class="tag">${escapeHtml(post.type)}</span>
@@ -488,6 +494,28 @@ function bindBaseMode() {
   });
 }
 
+function bindImagePreview() {
+  document.body.addEventListener("click", (event) => {
+    const trigger = event.target.closest("[data-preview]");
+    const existing = event.target.closest(".image-lightbox");
+    if (existing && !trigger) {
+      existing.remove();
+      return;
+    }
+    if (!trigger) return;
+    document.body.insertAdjacentHTML("beforeend", `
+      <div class="image-lightbox" role="dialog" aria-modal="true">
+        <button type="button" class="lightbox-close" aria-label="关闭图片预览">×</button>
+        <img src="${attr(trigger.dataset.preview)}" alt="图片预览" />
+      </div>
+    `);
+  });
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") $(".image-lightbox")?.remove();
+  });
+}
+
 function setActiveAnchors() {
   const links = [...document.querySelectorAll(".site-nav a, .float-menu a")];
   const sections = links
@@ -531,6 +559,7 @@ getData()
     bindMobileMenu();
     bindMessageForm();
     bindBaseMode();
+    bindImagePreview();
     setActiveAnchors();
     checkLocalLinks();
   })

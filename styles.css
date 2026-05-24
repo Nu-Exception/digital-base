@@ -776,6 +776,17 @@ footer {
   transition: transform .18s ease, border-color .18s ease;
 }
 
+.project-cover {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  display: block;
+  object-fit: cover;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, .04);
+}
+
 .project-card .btn {
   margin-top: 14px;
 }
@@ -791,6 +802,7 @@ footer {
 }
 
 .resource-card .icon {
+  overflow: hidden;
   display: grid;
   place-items: center;
   width: 38px;
@@ -799,6 +811,14 @@ footer {
   border-radius: 8px;
   background: rgba(255, 255, 255, .08);
   font-size: 21px;
+}
+
+.resource-card .icon img,
+.bookmark-icon img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
 
 .bookmark-section {
@@ -836,6 +856,21 @@ footer {
 .bookmark-card {
   min-height: 166px;
   background: linear-gradient(180deg, rgba(255, 255, 255, .045), rgba(255, 255, 255, .018)), var(--panel);
+}
+
+.bookmark-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  margin-bottom: 10px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  color: var(--accent);
+  background: rgba(255, 255, 255, .045);
+  font-size: 12px;
+  font-weight: 950;
 }
 
 .bookmark-card small {
@@ -884,13 +919,33 @@ footer {
   gap: 8px;
 }
 
-.feed-media img {
+.image-preview-btn {
+  position: relative;
   width: 100%;
-  aspect-ratio: 16 / 10;
-  object-fit: cover;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 7px;
   background: rgba(255, 255, 255, .04);
+  cursor: zoom-in;
+}
+
+.image-preview-btn.is-broken::after {
+  content: "图片暂不可用";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.feed-media img {
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  display: block;
+  object-fit: cover;
 }
 
 .feed-video {
@@ -904,6 +959,39 @@ footer {
   background: rgba(255, 207, 93, .08);
   font-size: 13px;
   font-weight: 850;
+}
+
+.image-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: grid;
+  place-items: center;
+  padding: 22px;
+  background: rgba(0, 0, 0, .78);
+}
+
+.image-lightbox img {
+  max-width: min(1080px, 100%);
+  max-height: calc(100vh - 80px);
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  object-fit: contain;
+  background: #0b0f17;
+}
+
+.lightbox-close {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: #fff;
+  background: rgba(255, 255, 255, .08);
+  font-size: 24px;
+  cursor: pointer;
 }
 
 .empty-state {
@@ -1182,6 +1270,10 @@ footer strong {
   .resource-card,
   .bookmark-card {
     min-height: auto;
+  }
+
+  .feed-media {
+    grid-template-columns: 1fr;
   }
 
   footer {
