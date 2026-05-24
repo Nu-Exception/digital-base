@@ -1,5 +1,5 @@
 import { createResourceHandlers } from "../_lib/resource.js";
-import { json, requireDb } from "../_lib/cms.js";
+import { json, requireAdmin, requireDb } from "../_lib/cms.js";
 
 const handlers = createResourceHandlers({
   table: "projects",
@@ -15,6 +15,14 @@ async function getProjectColumns(env) {
   return (results || []).map((column) => column.name);
 }
 
+function buildWhere(columns) {
+  const fields = ["is_public", "visible", "is_visible"].filter((field) => columns.includes(field));
+  if (!fields.length) return "";
+  const anyVisible = fields.map((field) => `${field} = 1`).join(" OR ");
+  const allUnset = fields.map((field) => `${field} IS NULL`).join(" AND ");
+  return `WHERE (${anyVisible} OR (${allUnset}))`;
+}
+
 export async function onRequestGet({ request, env }) {
   try {
     const dbError = requireDb(env);
@@ -22,6 +30,11 @@ export async function onRequestGet({ request, env }) {
 
     const url = new URL(request.url);
     const debug = url.searchParams.get("debug") === "1";
+    const admin = url.searchParams.get("admin") === "1";
+    if (admin) {
+      const authError = requireAdmin(request, env);
+      if (authError) return authError;
+    }
     const table = await env.DB.prepare(
       "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'projects'"
     ).first();
@@ -29,7 +42,7 @@ export async function onRequestGet({ request, env }) {
 
     if (!table_exists) {
       return debug
-        ? json({ table_exists, total_projects: 0, recent_projects: [] })
+        ? json({ table_exists, columns: [], total: 0, recent: [], total_projects: 0, recent_projects: [] })
         : json({ error: "projects table does not exist" }, 500);
     }
 
@@ -41,12 +54,14 @@ export async function onRequestGet({ request, env }) {
       return json({
         table_exists,
         columns,
+        total: total?.count ?? 0,
+        recent: recent.results || [],
         total_projects: total?.count ?? 0,
         recent_projects: recent.results || []
       });
     }
 
-    const where = columns.includes("is_public") ? "WHERE (is_public = 1 OR is_public IS NULL)" : "";
+    const where = admin ? "" : buildWhere(columns);
     const { results } = await env.DB.prepare(
       `SELECT * FROM projects ${where} ORDER BY sort_order ASC, id DESC`
     ).all();

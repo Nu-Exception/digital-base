@@ -538,6 +538,22 @@ footer {
   transition: transform .18s ease, border-color .18s ease;
 }
 
+.video-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(4, 6, 10, .08), rgba(4, 6, 10, .9) 78%);
+  pointer-events: none;
+}
+
+.video-cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .video-card:hover,
 .project-card:hover,
 .resource-card:hover,
@@ -549,9 +565,15 @@ footer {
 }
 
 .video-card-content {
+  position: relative;
+  z-index: 1;
   align-self: flex-end;
   width: 100%;
   padding: 12px;
+}
+
+.video-open {
+  margin-top: 10px;
 }
 
 .video-card h3 {
@@ -787,6 +809,17 @@ footer {
   background: rgba(255, 255, 255, .04);
 }
 
+.resource-cover {
+  width: 100%;
+  height: 118px;
+  display: block;
+  object-fit: cover;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: rgba(255, 255, 255, .04);
+}
+
 .project-card .btn {
   margin-top: 14px;
 }
@@ -802,6 +835,7 @@ footer {
 }
 
 .resource-card .icon {
+  overflow: hidden;
   display: grid;
   place-items: center;
   width: 38px;
@@ -810,6 +844,18 @@ footer {
   border-radius: 8px;
   background: rgba(255, 255, 255, .08);
   font-size: 21px;
+}
+
+.resource-card .icon img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.resource-card .btn,
+.bookmark-card .btn {
+  margin-top: 12px;
 }
 
 .bookmark-section {

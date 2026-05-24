@@ -509,3 +509,35 @@ MIT
 ## Projects API Rendering
 
 前台项目控制台优先读取 `/api/projects`，只显示公开项目，并按 `sort_order ASC`、`created_at DESC` 排序。API 失败或没有项目数据时，才回退 `data/site.json` 的默认项目。
+
+---
+
+## CMS/API Dynamic Rendering
+
+前台栏目正在逐步从静态 `data/site.json` 迁移到 CMS/API 动态渲染：
+
+- 项目控制台读取 `/api/projects`
+- 资源站读取 `/api/resources`
+- 书签导航读取 `/api/bookmarks`
+- 视频入口读取 `/api/video-links`
+- 动态墙和 Recent Log 读取 `/api/posts`
+- 首页 Hero 读取 `/api/site-settings`
+
+`data/site.json` 现在只作为 API 失败或数据库暂无内容时的 fallback。
+
+朋友空间是预留模块，当前前台暂时隐藏；后续可扩展为友链、开黑状态、留言互动等功能。后台朋友空间菜单会继续保留。
+
+测试地址：
+
+```txt
+/api/projects
+/api/resources
+/api/bookmarks
+/api/video-links
+/api/posts
+```
+
+维护规则：
+
+- 后续每次新增功能、API、页面或后台模块，都要同步更新 README.md
+- README 不要随便重写，只做增量维护

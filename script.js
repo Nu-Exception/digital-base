@@ -44,6 +44,38 @@ function attr(value = "") {
   return escapeHtml(value);
 }
 
+function normalizeUrl(value = "") {
+  const url = String(value || "").trim();
+  return url === "#" ? "" : url;
+}
+
+function isExternalUrl(url = "") {
+  return /^https?:\/\//i.test(url);
+}
+
+function isImageUrl(value = "") {
+  return /^https?:\/\//i.test(String(value)) || String(value).startsWith("/");
+}
+
+function isVisibleItem(item = {}) {
+  const status = String(item.status || "").trim().toLowerCase();
+  if (["hidden", "private", "draft", "隐藏"].includes(status)) return false;
+  const fields = ["is_public", "visible", "is_visible"];
+  const present = fields.filter((field) => item[field] !== undefined && item[field] !== null && item[field] !== "");
+  if (!present.length) return true;
+  return present.some((field) => Number(item[field]) === 1 || item[field] === true || item[field] === "true");
+}
+
+function sortCmsItems(items = []) {
+  return [...items].sort(compareCmsItems);
+}
+
+function compareCmsItems(a, b) {
+  const orderDiff = Number(a.sort_order ?? 0) - Number(b.sort_order ?? 0);
+  if (orderDiff) return orderDiff;
+  return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+}
+
 function normalizeArray(value) {
   if (Array.isArray(value)) return value;
   if (!value) return [];
@@ -171,16 +203,36 @@ function renderStatus(data) {
   $("#statusList").innerHTML = (status.lines || []).map((item) => `
     <div><strong>${escapeHtml(item.label)}</strong>${escapeHtml(item.value)}</div>
   `).join("");
+}
 
-  $("#updates").innerHTML = (data.updates || []).map((item) => `
+function renderRecentLog(items) {
+  $("#updates").innerHTML = items.length ? items.slice(0, 5).map((item) => `
     <div class="update-item">
       <div class="update-top">
-        <strong>${escapeHtml(item.time)}</strong>
-        <span>${escapeHtml(item.title || item.text || "")}</span>
+        <strong>${escapeHtml(formatDate(item.created_at || item.time || ""))}</strong>
+        <span>${escapeHtml(item.title || item.text || "动态")}</span>
       </div>
-      <p>${escapeHtml(item.description || item.text || "")}</p>
+      <p>${escapeHtml(item.body || item.description || item.text || "")}</p>
     </div>
-  `).join("");
+  `).join("") : '<div class="empty-state">暂无动态</div>';
+}
+
+async function loadRecentLog(data) {
+  try {
+    const result = await apiJson(`/api/posts?t=${Date.now()}`, { headers: { Accept: "application/json" } });
+    const rows = Array.isArray(result.posts) ? result.posts : [];
+    const posts = rows
+      .filter((post) => Number(post.is_public ?? 1) === 1)
+      .sort((a, b) => {
+        const pinnedDiff = Number(b.is_pinned || 0) - Number(a.is_pinned || 0);
+        if (pinnedDiff) return pinnedDiff;
+        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+      });
+    renderRecentLog(posts);
+  } catch (error) {
+    console.warn("/api/posts 暂不可用，最近动态使用 data/site.json 静态回退。", error);
+    renderRecentLog(data.updates || []);
+  }
 }
 
 function renderQuickLinks(data) {
@@ -212,6 +264,13 @@ async function loadFriends(data) {
   renderFriendsList(friends);
 }
 
+function hideFriendsSection() {
+  $("#friends")?.setAttribute("hidden", "");
+  document.querySelectorAll('a[href="#friends"]').forEach((link) => {
+    link.hidden = true;
+  });
+}
+
 function normalizeApiMessage(message) {
   return {
     name: message.nickname || message.name || "访客",
@@ -239,23 +298,18 @@ async function loadMessages(data) {
 }
 
 function normalizeProject(project = {}) {
-  const url = String(project.url || project.link || "").trim();
-  const status = String(project.status || "").trim().toLowerCase();
+  const url = normalizeUrl(project.url || project.link);
   return {
     id: project.id,
     title: project.title || project.name || "未命名项目",
     description: project.description || project.body || "",
     cover: project.cover || project.image || "",
-    url: url === "#" ? "" : url,
+    url,
     tags: normalizeArray(project.tags),
     sort_order: Number(project.sort_order ?? 0),
-    is_public: Number(project.is_public ?? (["hidden", "private", "draft", "隐藏"].includes(status) ? 0 : 1)),
+    is_public: isVisibleItem(project) ? 1 : 0,
     created_at: project.created_at || ""
   };
-}
-
-function isExternalUrl(url = "") {
-  return /^https?:\/\//i.test(url);
 }
 
 function renderProjectsList(projects) {
@@ -281,11 +335,7 @@ async function loadProjects(data) {
     const projects = rows
       .map(normalizeProject)
       .filter((project) => project.is_public === 1)
-      .sort((a, b) => {
-        const orderDiff = a.sort_order - b.sort_order;
-        if (orderDiff) return orderDiff;
-        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
-      });
+      .sort(compareCmsItems);
     renderProjectsList(rows.length ? projects : (data.projects || []));
   } catch (error) {
     console.warn("/api/projects 暂不可用，项目控制台使用 data/site.json 静态回退。", error);
@@ -293,14 +343,39 @@ async function loadProjects(data) {
   }
 }
 
-function renderVideoList(videos, data) {
-  $("#mainVideoLink").href = data.videoSiteUrl || videos[0]?.url || "#portal";
-  $("#videoRow").innerHTML = videos.slice(0, 6).map((video) => {
-    const tags = normalizeArray(video.tags);
-    const tagA = tags[0] || video.game || "PORTAL";
-    const tagB = tags[1] || video.length || "LINK";
+function normalizeVideo(video = {}) {
+  return {
+    title: video.title || video.name || "视频入口",
+    description: video.description || video.body || "",
+    url: normalizeUrl(video.url || video.link || video.video_url),
+    cover: video.cover || video.image || "",
+    tags: normalizeArray(video.tags),
+    category: video.category || "",
+    game: video.game || "",
+    length: video.length || "",
+    sort_order: Number(video.sort_order ?? 0),
+    created_at: video.created_at || "",
+    is_public: isVisibleItem(video) ? 1 : 0
+  };
+}
+
+function renderVideoList(videos, data, useFallbackMainLink = false) {
+  const normalized = videos.map(normalizeVideo);
+  const mainUrl = normalizeUrl(normalized.find((video) => video.url)?.url || (useFallbackMainLink ? data.videoSiteUrl : ""));
+  const mainLink = $("#mainVideoLink");
+  if (mainUrl) {
+    mainLink.href = mainUrl;
+  } else {
+    mainLink.removeAttribute("href");
+  }
+  mainLink.hidden = !mainUrl;
+  $("#videoRow").innerHTML = normalized.slice(0, 6).map((video) => {
+    const tagA = video.tags[0] || video.category || video.game || "PORTAL";
+    const tagB = video.tags[1] || video.length || "LINK";
+    const external = isExternalUrl(video.url);
     return `
-      <a class="video-card" href="${attr(video.url)}" target="_blank" rel="noreferrer" style='--cover:url("${attr(video.cover)}")'>
+      <article class="video-card">
+        ${video.cover ? `<img class="video-cover" src="${attr(video.cover)}" alt="${escapeHtml(video.title)}" loading="lazy" onerror="this.remove()" />` : ""}
         <div class="video-card-content">
           <h3>${escapeHtml(video.title)}</h3>
           <p>${escapeHtml(video.description)}</p>
@@ -308,44 +383,76 @@ function renderVideoList(videos, data) {
             <span class="tag">${escapeHtml(tagA)}</span>
             <span class="tag">${escapeHtml(tagB)}</span>
           </div>
+          ${video.url ? `<a class="btn compact video-open" href="${attr(video.url)}"${external ? ' target="_blank" rel="noreferrer"' : ""}>打开</a>` : ""}
         </div>
-      </a>
+      </article>
     `;
   }).join("");
 }
 
 async function loadVideos(data) {
-  const videos = await tryApi("/api/video-links", data.videos || [], (result) => {
-    const rows = result.videos || [];
-    return rows.length ? rows : data.videos || [];
-  });
-  renderVideoList(videos, data);
+  try {
+    const result = await apiJson("/api/video-links");
+    const rows = result.videoLinks || result.videos || [];
+    const videos = sortCmsItems(rows.map(normalizeVideo).filter((video) => video.is_public === 1));
+    renderVideoList(rows.length ? videos : (data.videos || []), data, rows.length === 0);
+  } catch (error) {
+    console.warn("/api/video-links 暂不可用，视频入口使用 data/site.json 静态回退。", error);
+    renderVideoList(data.videos || [], data, true);
+  }
+}
+
+function normalizeResource(resource = {}) {
+  const cover = resource.cover || resource.image || "";
+  const icon = resource.icon || "";
+  return {
+    title: resource.title || resource.name || "资源",
+    description: resource.description || resource.body || "",
+    url: normalizeUrl(resource.url || resource.link),
+    cover,
+    icon,
+    tags: normalizeArray(resource.tags),
+    category: resource.category || "",
+    sort_order: Number(resource.sort_order ?? 0),
+    created_at: resource.created_at || "",
+    is_public: isVisibleItem(resource) ? 1 : 0
+  };
 }
 
 function renderResourcesList(resources) {
-  $("#resourceDock").innerHTML = resources.map((resource) => {
-    const title = resource.title || resource.name;
+  $("#resourceDock").innerHTML = resources.map((rawResource) => {
+    const resource = normalizeResource(rawResource);
+    const external = isExternalUrl(resource.url);
+    const iconIsImage = isImageUrl(resource.icon);
     return `
-      <a class="resource-card" href="${attr(resource.url)}"${resource.url?.startsWith("#") ? "" : ' target="_blank" rel="noreferrer"'}>
-        <div class="icon">${escapeHtml(resource.icon || "IN")}</div>
-        <h3>${escapeHtml(title)}</h3>
+      <article class="resource-card">
+        ${resource.cover ? `<img class="resource-cover" src="${attr(resource.cover)}" alt="${escapeHtml(resource.title)}" loading="lazy" onerror="this.remove()" />` : ""}
+        ${resource.icon ? `<div class="icon resource-media">${iconIsImage ? `<img src="${attr(resource.icon)}" alt="${escapeHtml(resource.title)}" loading="lazy" onerror="this.remove()" />` : escapeHtml(resource.icon)}</div>` : ""}
+        <h3>${escapeHtml(resource.title)}</h3>
         <p>${escapeHtml(resource.description)}</p>
-      </a>
+        ${resource.category ? `<div class="meta"><span class="tag">${escapeHtml(resource.category)}</span></div>` : ""}
+        ${resource.url ? `<a class="btn compact" href="${attr(resource.url)}"${external ? ' target="_blank" rel="noreferrer"' : ""}>打开</a>` : ""}
+      </article>
     `;
   }).join("");
 }
 
 async function loadResources(data) {
-  const resources = await tryApi("/api/resources", data.resources || [], (result) => {
+  try {
+    const result = await apiJson("/api/resources");
     const rows = result.resources || [];
-    return rows.length ? rows : data.resources || [];
-  });
-  renderResourcesList(resources);
+    const resources = sortCmsItems(rows.map(normalizeResource).filter((resource) => resource.is_public === 1));
+    renderResourcesList(rows.length ? resources : (data.resources || []));
+  } catch (error) {
+    console.warn("/api/resources 暂不可用，资源站使用 data/site.json 静态回退。", error);
+    renderResourcesList(data.resources || []);
+  }
 }
 
 function renderBookmarkFilter(bookmarks) {
   const present = new Set(bookmarks.map((item) => item.category).filter(Boolean));
-  const categories = ["全部", ...BOOKMARK_CATEGORIES.filter((category) => present.has(category))];
+  const dynamicCategories = [...present].filter((category) => !BOOKMARK_CATEGORIES.includes(category));
+  const categories = ["全部", ...BOOKMARK_CATEGORIES.filter((category) => present.has(category)), ...dynamicCategories];
   if (!categories.includes(bookmarkCategory)) bookmarkCategory = "全部";
 
   $("#bookmarkFilter").innerHTML = categories.map((category) => `
@@ -353,29 +460,52 @@ function renderBookmarkFilter(bookmarks) {
   `).join("");
 }
 
+function normalizeBookmark(bookmark = {}) {
+  return {
+    title: bookmark.title || bookmark.name || "书签",
+    description: bookmark.description || bookmark.body || "",
+    url: normalizeUrl(bookmark.url || bookmark.link),
+    category: bookmark.category || "常用",
+    tags: normalizeArray(bookmark.tags),
+    sort_order: Number(bookmark.sort_order ?? 0),
+    created_at: bookmark.created_at || "",
+    is_public: isVisibleItem(bookmark) ? 1 : 0
+  };
+}
+
 function renderBookmarkList(bookmarks) {
   const visible = bookmarkCategory === "全部"
     ? bookmarks
     : bookmarks.filter((item) => item.category === bookmarkCategory);
 
-  $("#bookmarkGrid").innerHTML = visible.map((bookmark) => {
-    const title = bookmark.title || bookmark.name;
+  $("#bookmarkGrid").innerHTML = visible.map((rawBookmark) => {
+    const bookmark = normalizeBookmark(rawBookmark);
+    const external = isExternalUrl(bookmark.url);
     return `
-      <a class="bookmark-card" href="${attr(bookmark.url)}"${bookmark.url?.startsWith("#") ? "" : ' target="_blank" rel="noreferrer"'}>
+      <article class="bookmark-card">
         <small>${escapeHtml(bookmark.category)}</small>
-        <h3>${escapeHtml(title)}</h3>
+        <h3>${escapeHtml(bookmark.title)}</h3>
         <p>${escapeHtml(bookmark.description)}</p>
-      </a>
+        ${bookmark.tags.length ? `<div class="meta">${bookmark.tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>` : ""}
+        ${bookmark.url ? `<a class="btn compact" href="${attr(bookmark.url)}"${external ? ' target="_blank" rel="noreferrer"' : ""}>打开</a>` : ""}
+      </article>
     `;
-  }).join("");
+  }).join("") || '<div class="empty-state">这个分类还没有书签。</div>';
 }
 
 async function loadBookmarks(data) {
-  const bookmarks = await tryApi("/api/bookmarks", data.bookmarks || [], (result) => {
+  let bookmarks = [];
+  try {
+    const result = await apiJson("/api/bookmarks");
     const rows = result.bookmarks || [];
-    return rows.length ? rows : data.bookmarks || [];
-  });
-  siteData.bookmarks = bookmarks;
+    bookmarks = rows.length
+      ? sortCmsItems(rows.map(normalizeBookmark).filter((bookmark) => bookmark.is_public === 1))
+      : (data.bookmarks || []);
+  } catch (error) {
+    console.warn("/api/bookmarks 暂不可用，我的导航使用 data/site.json 静态回退。", error);
+    bookmarks = data.bookmarks || [];
+  }
+  siteData.bookmarks = bookmarks.map(normalizeBookmark);
   renderBookmarkFilter(bookmarks);
   renderBookmarkList(bookmarks);
   $("#bookmarkFilter").onclick = (event) => {
@@ -550,9 +680,10 @@ getData()
     setCarousel(await loadSlides(siteData));
     renderStatus(siteData);
     renderQuickLinks(siteData);
+    hideFriendsSection();
     await Promise.all([
-      loadFriends(siteData),
       loadPosts(siteData),
+      loadRecentLog(siteData),
       loadMessages(siteData),
       loadProjects(siteData),
       loadVideos(siteData),
