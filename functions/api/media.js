@@ -1,10 +1,13 @@
 export async function onRequestGet() {
-  return Response.json({
-    media: [],
-    ok: true
-  }, {
-    headers: {
-      "Cache-Control": "no-store"
+  return new Response(
+    JSON.stringify({
+      ok: true,
+      media: []
+    }),
+    {
+      headers: {
+        "content-type": "application/json"
+      }
     }
-  });
+  );
 }
