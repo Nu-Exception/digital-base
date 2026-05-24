@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Base V3 - 个人互动网站</title>
+  <meta name="description" content="暗黑游戏平台风格的个人互动网站，包含首页轮播、视频传送门、项目入口、资源导航和书签收藏区。" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <div class="page-glow" aria-hidden="true"></div>
+  <div class="grain" aria-hidden="true"></div>
+
+  <header class="top-nav">
+    <a class="brand" href="#home" aria-label="Digital Base 首页">
+      <span class="brand-mark">DB</span>
+      <span class="brand-text">
+        <strong>DIGITAL BASE</strong>
+        <small>私人互动基地</small>
+      </span>
+    </a>
+
+    <button class="menu-toggle" id="menuToggle" type="button" aria-controls="siteNav" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+
+    <nav class="site-nav" id="siteNav" aria-label="主导航">
+      <a href="#home">首页</a>
+      <a href="#portal">视频入口</a>
+      <a href="#status">状态</a>
+      <a href="#friends">朋友</a>
+      <a href="#projects">项目</a>
+      <a href="#resources">资源</a>
+      <a href="#bookmarks">我的导航</a>
+    </nav>
+
+    <button class="sound-btn" id="soundBtn" type="button">BASE MODE</button>
+  </header>
+
+  <aside class="float-menu" id="floatMenu" aria-label="页面快捷菜单">
+    <div class="menu-title"><span></span> QUICK JUMP</div>
+    <a href="#home"><b>01</b><em>首页</em></a>
+    <a href="#portal"><b>02</b><em>视频入口</em></a>
+    <a href="#status"><b>03</b><em>基地状态</em></a>
+    <a href="#friends"><b>04</b><em>朋友空间</em></a>
+    <a href="#projects"><b>05</b><em>项目控制台</em></a>
+    <a href="#resources"><b>06</b><em>资源站</em></a>
+    <a href="#bookmarks"><b>07</b><em>我的导航</em></a>
+    <a href="#guestbook"><b>08</b><em>留言板</em></a>
+  </aside>
+
+  <main>
+    <section class="hero" id="home">
+      <div class="hero-carousel" aria-label="首页轮播">
+        <div class="carousel-track" id="carouselTrack"></div>
+        <div class="carousel-shade"></div>
+        <div class="hero-content">
+          <p class="eyebrow" id="heroEyebrow"></p>
+          <h1 id="heroTitle"></h1>
+          <p class="hero-lead" id="heroLead"></p>
+          <div class="hero-actions">
+            <a class="btn primary" id="heroPrimary" href="#bookmarks">进入导航页</a>
+            <a class="btn ghost" id="heroSecondary" href="#portal">打开视频入口</a>
+          </div>
+        </div>
+        <div class="hero-status-card">
+          <small>NOW ONLINE</small>
+          <strong id="miniCurrent"></strong>
+          <span id="miniNext"></span>
+        </div>
+        <div class="dots" id="dots" aria-label="轮播切换"></div>
+      </div>
+    </section>
+
+    <section class="section portal" id="portal">
+      <div class="section-head inline-head">
+        <div>
+          <p>VIDEO PORTAL</p>
+          <h2>视频传送门</h2>
+        </div>
+        <a class="btn compact" id="mainVideoLink" href="#" target="_blank" rel="noreferrer">进入完整项目</a>
+      </div>
+      <div class="video-row" id="videoRow" aria-label="视频入口列表"></div>
+    </section>
+
+    <section class="section module-zone" aria-label="首页模块">
+      <div class="module-grid">
+        <article class="feature-panel status-panel" id="status">
+          <div class="panel-label">STATUS PANEL</div>
+          <div class="online-dot"></div>
+          <h2 id="statusTitle"></h2>
+          <p id="statusText"></p>
+          <div class="status-list" id="statusList"></div>
+        </article>
+
+        <article class="feature-panel updates-panel">
+          <div class="panel-label">RECENT LOG</div>
+          <h2>最近动态</h2>
+          <div class="updates" id="updates"></div>
+        </article>
+
+        <article class="feature-panel quick-panel">
+          <div class="panel-label">FAST LINKS</div>
+          <h2>常用入口</h2>
+          <div class="quick-links" id="quickLinks"></div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="friends">
+      <div class="section-head">
+        <p>FRIENDS ZONE</p>
+        <h2>朋友空间</h2>
+      </div>
+      <div class="friend-layout">
+        <div class="friend-board">
+          <h3>今晚开黑面板</h3>
+          <p>这里保留轻互动感：在线状态、开黑预约、朋友留言和小公告都可以继续从静态数据扩展。</p>
+          <div class="friend-status" id="friendStatus"></div>
+        </div>
+        <div class="friend-cards" id="friendCards"></div>
+      </div>
+    </section>
+
+    <section class="section" id="projects">
+      <div class="section-head">
+        <p>PROJECT CONSOLE</p>
+        <h2>项目控制台</h2>
+      </div>
+      <div class="project-grid" id="projectsGrid"></div>
+    </section>
+
+    <section class="section" id="resources">
+      <div class="section-head">
+        <p>RESOURCE DOCK</p>
+        <h2>资源站</h2>
+      </div>
+      <div class="resource-dock" id="resourceDock"></div>
+    </section>
+
+    <section class="section bookmark-section" id="bookmarks">
+      <div class="section-head inline-head">
+        <div>
+          <p>MY NAVIGATION</p>
+          <h2>我的导航页 / 书签收藏区</h2>
+        </div>
+        <span class="section-note">收藏的网站、工具、项目后台和常用入口</span>
+      </div>
+      <div class="bookmark-filter" id="bookmarkFilter" aria-label="书签分类筛选"></div>
+      <div class="bookmark-grid" id="bookmarkGrid"></div>
+    </section>
+
+    <section class="section" id="guestbook">
+      <div class="section-head">
+        <p>GUESTBOOK</p>
+        <h2>留言板</h2>
+      </div>
+      <div class="message-wall" id="messages"></div>
+    </section>
+
+    <section class="section lab" id="lab">
+      <div class="section-head">
+        <p>BASE LAB</p>
+        <h2>后续扩展</h2>
+      </div>
+      <div class="lab-panel">
+        <div>
+          <strong>静态优先</strong>
+          <span>现在保持 HTML / CSS / JavaScript，内容集中在 data/site.json。</span>
+        </div>
+        <div>
+          <strong>以后可接入</strong>
+          <span>Cloudflare D1 留言板、R2 图床、Workers API，都可以放到下一阶段。</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <strong>DIGITAL BASE V3</strong>
+    <span>Static site for Cloudflare Pages</span>
+    <em>个人互联网基地，慢慢扩建。</em>
+  </footer>
+
+  <script src="./script.js"></script>
+</body>
+</html>

@@ -1,0 +1,293 @@
+{
+  "hero": {
+    "eyebrow": "WELCOME BACK / GAME PLATFORM STYLE",
+    "title": "我的数字基地",
+    "lead": "一个暗黑游戏平台风格的个人互动首页：顶部导航、大轮播图、轻量视频传送门、项目卡片、资源站和我的书签收藏区都集中在这里。",
+    "primaryLabel": "进入我的导航",
+    "primaryUrl": "#bookmarks",
+    "secondaryLabel": "查看视频入口",
+    "secondaryUrl": "#portal"
+  },
+  "mini": {
+    "current": "Digital Base V3 已上线",
+    "next": "静态部署 / Cloudflare Pages"
+  },
+  "heroSlides": [
+    {
+      "image": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1800&q=85"
+    },
+    {
+      "image": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1800&q=85"
+    },
+    {
+      "image": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1800&q=85"
+    }
+  ],
+  "status": {
+    "title": "基地状态：在线",
+    "text": "首页保留暗黑游戏平台的视觉气质，但不做赛博终端风。这里更像一个私人游戏大厅，负责聚合我的链接、项目、朋友空间和视频入口。",
+    "lines": [
+      {
+        "label": "Playing",
+        "value": "CS2 / 单机游戏 / 朋友开黑"
+      },
+      {
+        "label": "Working",
+        "value": "个人网站、GitHub、Cloudflare Pages"
+      },
+      {
+        "label": "Mood",
+        "value": "深夜整理收藏夹，顺手修基地"
+      },
+      {
+        "label": "Plan",
+        "value": "GitHub 上传 -> Pages 部署 -> 绑定域名"
+      }
+    ]
+  },
+  "updates": [
+    {
+      "time": "Today",
+      "text": "重排首页：顶部导航、大轮播、横向视频入口、下方模块卡片。"
+    },
+    {
+      "time": "Next",
+      "text": "继续完善我的导航页，把常用网站和工具集中管理。"
+    },
+    {
+      "time": "Future",
+      "text": "如果后续需要互动留言，再考虑 Cloudflare D1 / Workers。"
+    }
+  ],
+  "quickLinks": [
+    {
+      "name": "我的导航页",
+      "label": "BOOKMARKS",
+      "url": "#bookmarks"
+    },
+    {
+      "name": "项目控制台",
+      "label": "PROJECTS",
+      "url": "#projects"
+    },
+    {
+      "name": "资源站",
+      "label": "TOOLS",
+      "url": "#resources"
+    },
+    {
+      "name": "Cloudflare Dashboard",
+      "label": "DEPLOY",
+      "url": "https://dash.cloudflare.com/",
+      "external": true
+    }
+  ],
+  "friendStatus": [
+    "今晚状态：可开黑 / 可摸鱼 / 可继续改网站",
+    "基地公告：视频区只做传送门，不堆成完整视频网站",
+    "后续想法：朋友状态、留言板和随机小组件可以继续静态扩展"
+  ],
+  "friends": [
+    {
+      "name": "阿杰",
+      "status": "今晚可能上线，适合开黑，也适合帮忙看页面效果。",
+      "tag": "ONLINE SOON"
+    },
+    {
+      "name": "老王",
+      "status": "负责吐槽网站和测试链接，偶尔提供很有用的坏消息。",
+      "tag": "QA"
+    },
+    {
+      "name": "阿伟",
+      "status": "今日牢大候选人，等待朋友空间继续扩建。",
+      "tag": "MYSTERY"
+    },
+    {
+      "name": "站长",
+      "status": "正在把这个地方变成真正顺手的个人互联网基地。",
+      "tag": "ADMIN"
+    }
+  ],
+  "messages": [
+    {
+      "name": "阿杰",
+      "text": "首页这个方向可以，像游戏大厅，不像单纯的资料页。"
+    },
+    {
+      "name": "老王",
+      "text": "书签区很实用，建议以后按开发、素材、AI、游戏继续分组。"
+    },
+    {
+      "name": "站长",
+      "text": "先保持纯静态，部署稳定以后再慢慢接互动能力。"
+    }
+  ],
+  "projects": [
+    {
+      "name": "Digital Base",
+      "description": "当前个人互动网站首页，负责聚合状态、朋友空间、项目入口、资源站、视频传送门和书签导航。",
+      "tags": [
+        "Cloudflare Pages",
+        "Static",
+        "Game UI"
+      ],
+      "url": "#home"
+    },
+    {
+      "name": "Game Cuts Showcase",
+      "description": "之前的视频项目。这个首页只提供入口，避免重复做成完整视频网站。",
+      "tags": [
+        "Video Portal",
+        "Game",
+        "Link"
+      ],
+      "url": "https://github.com/"
+    },
+    {
+      "name": "FreeDomain Notes",
+      "description": "免费域名和 DNS 相关记录，可以用于给数字基地绑定个性域名。",
+      "tags": [
+        "Domain",
+        "DNS",
+        "Cloudflare"
+      ],
+      "url": "https://github.com/Nu-Exception/FreeDomain"
+    }
+  ],
+  "videoSiteUrl": "https://github.com/",
+  "videos": [
+    {
+      "title": "完整视频项目入口",
+      "description": "点击进入之前的视频站或视频合集项目。",
+      "game": "PORTAL",
+      "length": "LINK",
+      "url": "https://github.com/",
+      "cover": "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1000&q=85"
+    },
+    {
+      "title": "精选瞬间",
+      "description": "只保留少量精选封面，让这里保持轻入口。",
+      "game": "FPS",
+      "length": "00:47",
+      "url": "https://github.com/",
+      "cover": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1000&q=85"
+    },
+    {
+      "title": "更多内容",
+      "description": "真正的视频列表由旧项目承接，这里不重复堆内容。",
+      "game": "GAME",
+      "length": "MORE",
+      "url": "https://github.com/",
+      "cover": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1000&q=85"
+    },
+    {
+      "title": "直播 / 回放占位",
+      "description": "以后可以放直播间、回放合集或频道主页。",
+      "game": "LIVE",
+      "length": "SOON",
+      "url": "https://github.com/",
+      "cover": "https://images.unsplash.com/photo-1511882150382-421056c89033?auto=format&fit=crop&w=1000&q=85"
+    }
+  ],
+  "resources": [
+    {
+      "icon": "CF",
+      "name": "Cloudflare",
+      "description": "Pages、域名、DNS、Workers 和 R2 的管理入口。",
+      "url": "https://dash.cloudflare.com/"
+    },
+    {
+      "icon": "GH",
+      "name": "GitHub",
+      "description": "代码仓库、提交记录和静态部署源。",
+      "url": "https://github.com/"
+    },
+    {
+      "icon": "AI",
+      "name": "ChatGPT",
+      "description": "写代码、改项目、做方案和整理文案。",
+      "url": "https://chatgpt.com/"
+    },
+    {
+      "icon": "ST",
+      "name": "Steam",
+      "description": "游戏库、好友动态、社区和愿望单。",
+      "url": "https://store.steampowered.com/"
+    },
+    {
+      "icon": "TL",
+      "name": "工具箱",
+      "description": "以后放常用在线工具和效率入口。",
+      "url": "#bookmarks"
+    },
+    {
+      "icon": "LB",
+      "name": "实验室",
+      "description": "后续放 AI 小工具、互动组件和静态玩法。",
+      "url": "#lab"
+    }
+  ],
+  "bookmarks": [
+    {
+      "category": "部署",
+      "name": "Cloudflare Dashboard",
+      "description": "Pages、Workers、DNS、R2 都在这里管理。",
+      "url": "https://dash.cloudflare.com/"
+    },
+    {
+      "category": "代码",
+      "name": "GitHub",
+      "description": "项目仓库、提交记录、Issues 和自动部署入口。",
+      "url": "https://github.com/"
+    },
+    {
+      "category": "AI",
+      "name": "ChatGPT",
+      "description": "写代码、想方案、改文案、做项目规划。",
+      "url": "https://chatgpt.com/"
+    },
+    {
+      "category": "游戏",
+      "name": "Steam",
+      "description": "游戏库、好友、社区、愿望单和活动页面。",
+      "url": "https://store.steampowered.com/"
+    },
+    {
+      "category": "视频",
+      "name": "Bilibili",
+      "description": "视频发布、学习资料、游戏内容参考。",
+      "url": "https://www.bilibili.com/"
+    },
+    {
+      "category": "工具",
+      "name": "Temp Mail",
+      "description": "临时邮箱工具，用于测试注册和收件。",
+      "url": "https://tempmail.plus/zh/"
+    },
+    {
+      "category": "素材",
+      "name": "Unsplash",
+      "description": "首页轮播图、封面图和视觉素材来源。",
+      "url": "https://unsplash.com/"
+    },
+    {
+      "category": "工具",
+      "name": "JSON Formatter",
+      "description": "检查和格式化 data/site.json，避免部署后页面读取失败。",
+      "url": "https://jsonformatter.org/"
+    },
+    {
+      "category": "学习",
+      "name": "MDN Web Docs",
+      "description": "HTML、CSS、JavaScript 文档和兼容性查询。",
+      "url": "https://developer.mozilla.org/"
+    },
+    {
+      "category": "备用",
+      "name": "更多收藏占位",
+      "description": "后续可以继续把自己的网页书签添加到这里。",
+      "url": "#bookmarks"
+    }
+  ]
+}
