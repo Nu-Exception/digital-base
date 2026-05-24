@@ -1,46 +1,183 @@
 # DIGITAL BASE V3
 
-> 一个持续搭建中的个人数字基地  
-> Cloudflare Pages + Functions + D1 驱动的赛博风个人网站
+> Cyber Style Personal Base  
+> 基于 Cloudflare Pages + Functions + D1 的个人数字基地
 
 ---
 
-# 项目介绍
+<p align="center">
 
-Digital Base V3 是我目前正在长期维护的个人互动网站。
+一个持续搭建中的个人互动网站。  
+集成 CMS 后台、动态系统、项目展示、资源导航和 Cloudflare Functions API。
 
-这个项目最开始只是一个简单主页，
-后来逐渐加入了：
+</p>
 
-- CMS 后台
-- 动态系统
-- 项目展示
+---
+
+# 项目预览
+
+## 前台页面
+
+- 首页 Hero
+- 动态墙
+- 项目控制台
 - 视频入口
 - 资源导航
-- 个人状态系统
-- 云函数 API
-- 数据库存储
+- 游戏风 UI
 
-现在它更像一个：
+---
 
-> “属于自己的数字基地”
+## CMS 后台
 
-这里会放：
+支持在线管理：
 
-- 我做过的项目
+- 首页内容
+- 动态发布
+- 项目管理
 - 视频入口
-- 收藏资源
-- 游戏相关内容
-- AI 工具实验
-- 深夜灵感记录
+- 导航收藏
+- 资源站
 
-整个网站使用偏暗色、赛博、游戏 UI 风格设计，
-灵感来自：
+无需重新修改代码即可更新网站内容。
 
-- 游戏大厅 UI
-- OBS 面板
+---
+
+# 项目特点
+
+## 游戏 / 赛博风 UI
+
+整体采用：
+
+- 深色电竞风
+- HUD 风格布局
+- 发光描边
+- 卡片式模块
+- 动态光效
+
+灵感来源：
+
+- 游戏大厅
 - 战术终端
-- 深夜电竞房氛围
+- OBS 控制台
+- 深夜电竞房
+
+---
+
+## Cloudflare 全家桶部署
+
+项目运行于：
+
+- Cloudflare Pages
+- Cloudflare Functions
+- Cloudflare D1
+
+特点：
+
+- 免费部署
+- 全球 CDN
+- 自动 HTTPS
+- GitHub 自动更新
+- 无需传统服务器
+
+---
+
+## 轻量 CMS
+
+本项目最大的目标之一：
+
+> 不使用传统后端服务器，也能拥有自己的 CMS 后台。
+
+整个系统基于：
+
+- Functions API
+- D1 数据库
+- 原生 HTML/CSS/JS
+
+实现轻量内容管理。
+
+---
+
+# 当前已实现功能
+
+## 首页 Hero 系统
+
+支持：
+
+- 标题
+- 描述
+- 状态卡片
+- 按钮跳转
+- 背景图
+
+可直接后台修改。
+
+---
+
+## 动态墙系统
+
+支持：
+
+- 文字动态
+- 图片动态
+- 标签分类
+- 时间排序
+- 置顶功能
+
+目前图片支持：
+
+- jpg
+- png
+- webp
+- gif
+
+支持外链图片。
+
+---
+
+## 项目展示系统
+
+支持展示：
+
+- GitHub 项目
+- 网站项目
+- 视频项目
+- 工具项目
+
+功能：
+
+- 项目封面
+- 标签
+- 跳转链接
+- 排序
+- 显示隐藏
+
+---
+
+## 视频入口系统
+
+用于整合：
+
+- 视频主页
+- 剪辑合集
+- 回放入口
+- 收藏频道
+
+避免视频内容分散。
+
+---
+
+## 资源导航系统
+
+目前整理：
+
+- Cloudflare
+- GitHub
+- ChatGPT
+- Steam
+- AI 工具
+- 开发资源
+
+后续会继续扩展。
 
 ---
 
@@ -52,141 +189,21 @@ Digital Base V3 是我目前正在长期维护的个人互动网站。
 - CSS3
 - JavaScript
 
+---
+
 ## 云平台
 
 - Cloudflare Pages
 - Cloudflare Functions
 - Cloudflare D1
 
-## 数据系统
+---
+
+## 数据结构
 
 - SQLite（D1）
 - REST API
-- JSON 数据结构
-
----
-
-# 当前已实现功能
-
-## CMS 后台
-
-支持：
-
-- 首页内容修改
-- 动态发布
-- 项目管理
-- 视频入口管理
-- 资源站管理
-- 导航收藏管理
-
-后台可直接在线编辑，
-不需要重新改代码。
-
----
-
-## 动态墙系统
-
-支持：
-
-- 文字动态
-- 图片动态
-- 标签分类
-- 置顶
-- 时间排序
-
-目前图片支持：
-
-- 外链图片
-- jpg/png/webp/gif
-
----
-
-## 项目展示系统
-
-可展示：
-
-- GitHub 项目
-- 网站项目
-- 视频项目
-- 工具项目
-
-支持：
-
-- 封面图
-- 标签
-- 外链跳转
-- 排序
-
----
-
-## 视频入口系统
-
-用于整合：
-
-- 视频主页
-- 剪辑入口
-- 回放入口
-- 收藏频道
-
-避免视频内容过于分散。
-
----
-
-## 资源导航
-
-目前整理了：
-
-- Cloudflare
-- GitHub
-- ChatGPT
-- Steam
-- 工具站
-- 实验区
-
-后续会继续扩展。
-
----
-
-# 项目特点
-
-## 游戏风 UI
-
-整个网站采用：
-
-- 暗色电竞风
-- 发光描边
-- HUD 风格模块
-- 卡片式布局
-- 赛博感动画
-
-而不是传统博客风。
-
----
-
-## Cloudflare 全家桶部署
-
-项目目前运行于：
-
-- Cloudflare Pages
-- Functions
-- D1 Database
-
-特点：
-
-- 免费
-- 部署快
-- 全球 CDN
-- 适合个人项目
-
----
-
-## 轻量 CMS
-
-这个项目最大的目标之一：
-
-> “不用传统服务器，也能拥有自己的内容后台”
-
-因此整个 CMS 都是轻量结构。
+- JSON
 
 ---
 
@@ -206,7 +223,7 @@ Digital Base V3 是我目前正在长期维护的个人互动网站。
 
 # API 示例
 
-## 获取动态
+## 获取动态列表
 
 ```bash
 /api/posts
@@ -232,7 +249,7 @@ Digital Base V3 是我目前正在长期维护的个人互动网站。
 
 # 本地运行
 
-## 克隆项目
+## 1. 克隆项目
 
 ```bash
 git clone https://github.com/Nu-Exception/digital-base.git
@@ -240,7 +257,7 @@ git clone https://github.com/Nu-Exception/digital-base.git
 
 ---
 
-## 进入目录
+## 2. 进入项目目录
 
 ```bash
 cd digital-base
@@ -248,9 +265,9 @@ cd digital-base
 
 ---
 
-## 本地预览
+## 3. 本地预览
 
-直接使用：
+可以直接使用：
 
 ```bash
 Live Server
@@ -264,49 +281,188 @@ npx wrangler pages dev .
 
 ---
 
-# 部署方式
+# Cloudflare 部署教程
 
-推荐直接部署到：
+## 1. Fork 或上传项目到 GitHub
 
-## Cloudflare Pages
-
-连接 GitHub 后即可自动部署。
+将项目上传到自己的 GitHub 仓库。
 
 ---
 
-# 后续计划
+## 2. 登录 Cloudflare
+
+进入：
+
+```txt
+Workers & Pages
+```
+
+---
+
+## 3. 创建 Pages 项目
+
+选择：
+
+```txt
+Connect to Git
+```
+
+连接 GitHub 仓库。
+
+---
+
+## 4. 部署配置
+
+构建配置：
+
+```txt
+Framework preset:
+None
+
+Build command:
+（留空）
+
+Build output directory:
+/
+```
+
+---
+
+## 5. 创建 D1 数据库
+
+进入：
+
+```txt
+Storage & Databases -> D1
+```
+
+创建数据库。
+
+例如：
+
+```txt
+digital-base-db
+```
+
+---
+
+## 6. 绑定 D1
+
+进入：
+
+```txt
+Pages -> Settings -> Bindings
+```
+
+添加：
+
+```txt
+Type:
+D1 Database
+
+Variable name:
+DB
+```
+
+绑定你的 D1 数据库。
+
+---
+
+## 7. 初始化数据库
+
+执行 SQL：
+
+```sql
+CREATE TABLE posts (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT,
+  content TEXT
+);
+```
+
+或者导入项目提供的：
+
+```txt
+schema.sql
+```
+
+---
+
+## 8. 自动部署
+
+以后只需要：
+
+```bash
+git push
+```
+
+Cloudflare Pages 会自动重新部署。
+
+---
+
+# 图片上传说明
+
+目前版本使用：
+
+```txt
+外链图片
+```
+
+推荐：
+
+- Postimages
+- ImgBB
+- GitHub Raw
+
+注意：
+
+必须填写：
+
+```txt
+直接图片链接
+```
+
+例如：
+
+```txt
+https://i.postimg.cc/xxxxx/demo.jpg
+```
+
+而不是网页链接。
+
+---
+
+# 后续开发计划
 
 正在慢慢加入：
 
 - 朋友空间
-- AI 工具实验室
-- 多主题模式
-- 游戏数据展示
-- 更完整 CMS
-- 评论系统
+- AI 实验区
 - 登录系统
+- 评论系统
 - 文件上传
-- 自定义组件
+- 多主题模式
+- 更完整 CMS
+- 用户系统
+- Markdown 编辑器
 
 ---
 
 # 项目状态
 
-## 当前状态
-
 ```txt
 ACTIVE DEVELOPMENT
 ```
 
-这个项目仍然在持续更新。
+项目仍在持续开发中。
 
-很多地方还在重构和优化。
+很多模块还会继续优化。
 
 ---
 
 # 作者
 
-## 松哥 / Nu-Exception
+## CS
 
 正在学习：
 
@@ -315,6 +471,20 @@ ACTIVE DEVELOPMENT
 - UI 设计
 - AI 工具
 - 网站系统搭建
+
+---
+
+# 联系方式
+
+## GitHub
+
+https://github.com/Nu-Exception
+
+---
+
+## Website
+
+https://digital-base.pages.dev
 
 ---
 
