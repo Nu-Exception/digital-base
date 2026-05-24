@@ -1,18 +1,11 @@
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: {
-      "Content-Type": "application/json; charset=utf-8"
-    }
-  });
-}
+import { json, readJson } from "../_lib/cms.js";
 
 export async function onRequestPost({ request, env }) {
   if (!env.ADMIN_PASSWORD) {
     return json({ error: "ADMIN_PASSWORD 未配置" }, 500);
   }
 
-  const body = await request.json().catch(() => ({}));
+  const body = await readJson(request);
   if (!body.password || body.password !== env.ADMIN_PASSWORD) {
     return json({ error: "管理员密码错误" }, 401);
   }
