@@ -50,7 +50,10 @@ function normalizeArray(value) {
     const parsed = JSON.parse(value);
     return Array.isArray(parsed) ? parsed : [];
   } catch {
-    return [];
+    return String(value)
+      .split(/[\n,]/)
+      .map((item) => item.trim())
+      .filter(Boolean);
   }
 }
 
@@ -351,20 +354,38 @@ async function loadBookmarks(data) {
   };
 }
 
+function normalizePostForFeed(post) {
+  return {
+    id: post.id,
+    title: post.title || "未命名动态",
+    body: post.body || "",
+    type: post.type || "文字",
+    images: normalizeArray(post.images).filter(Boolean),
+    video_url: post.video_url || "",
+    tags: normalizeArray(post.tags).filter(Boolean),
+    is_public: Number(post.is_public ?? 1),
+    is_pinned: Number(post.is_pinned || 0),
+    created_at: post.created_at || "",
+    updated_at: post.updated_at || ""
+  };
+}
+
 function renderFeed(posts) {
   const feed = $("#dynamicFeed");
   if (!feed) return;
-  feed.innerHTML = posts.length ? posts.map((post) => {
-    const images = normalizeArray(post.images).filter(Boolean);
-    const tags = normalizeArray(post.tags).filter(Boolean);
+  const normalizedPosts = Array.isArray(posts) ? posts.map(normalizePostForFeed) : [];
+  feed.innerHTML = normalizedPosts.length ? normalizedPosts.map((post) => {
     return `
       <article class="feed-card">
         <time>${escapeHtml(formatDate(post.created_at))}${post.is_pinned ? " / 置顶" : ""}</time>
         <h3>${escapeHtml(post.title)}</h3>
-        <p>${escapeHtml(post.body || post.description || "")}</p>
-        ${images.length ? `<div class="feed-media">${images.map((image) => `<img src="${attr(image)}" alt="${escapeHtml(post.title)}" loading="lazy" />`).join("")}</div>` : ""}
+        <p>${escapeHtml(post.body)}</p>
+        ${post.images.length ? `<div class="feed-media">${post.images.map((image) => `<img src="${attr(image)}" alt="${escapeHtml(post.title)}" loading="lazy" />`).join("")}</div>` : ""}
         ${post.video_url ? `<a class="feed-video" href="${attr(post.video_url)}" target="_blank" rel="noreferrer">打开视频链接</a>` : ""}
-        ${tags.length ? `<div class="meta">${tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>` : ""}
+        <div class="meta">
+          <span class="tag">${escapeHtml(post.type)}</span>
+          ${post.tags.map((tag) => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}
+        </div>
       </article>
     `;
   }).join("") : '<div class="empty-state">还没有发布动态。登录后台后，可以先发第一条。</div>';
@@ -384,7 +405,16 @@ function fallbackPosts(data) {
 
 async function loadPosts(data) {
   try {
-    const result = await apiJson("/api/posts");
+    const res = await fetch(`/api/posts?t=${Date.now()}`, {
+      cache: "no-store",
+      headers: {
+        "Accept": "application/json"
+      }
+    });
+    const result = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      throw new Error(result.error || `请求失败：${res.status}`);
+    }
     const posts = Array.isArray(result.posts) ? result.posts : [];
     const visiblePosts = posts
       .filter((post) => Number(post.is_public ?? 1) === 1)
