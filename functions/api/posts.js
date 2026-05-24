@@ -5,7 +5,6 @@ import {
   getId,
   json,
   methodNotAllowed,
-  normalizeJsonArrays,
   pickBody,
   readJson,
   requireAdmin,
@@ -15,6 +14,43 @@ import {
   toInt,
   updateItem
 } from "../_lib/cms.js";
+
+function postsJson(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store"
+    }
+  });
+}
+
+function parseArray(value) {
+  if (Array.isArray(value)) return value;
+  if (!value) return [];
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function normalizePost(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    body: row.body,
+    type: row.type,
+    images: parseArray(row.images),
+    video_url: row.video_url,
+    tags: parseArray(row.tags),
+    is_public: row.is_public,
+    is_pinned: row.is_pinned,
+    created_at: row.created_at,
+    updated_at: row.updated_at
+  };
+}
 
 const POST_TYPES = new Set(["文字", "图片", "视频", "文章"]);
 
@@ -45,47 +81,57 @@ function normalizeInput(body) {
 }
 
 export async function onRequestGet({ request, env }) {
-  const dbError = requireDb(env);
-  if (dbError) return dbError;
-
   try {
+    if (!env.DB) {
+      return postsJson({ error: "D1 数据库未绑定，请绑定变量 DB" }, 500);
+    }
+
     const url = new URL(request.url);
     const admin = url.searchParams.get("admin") === "1";
+    const debug = url.searchParams.get("debug") === "1";
+
+    if (debug) {
+      const total = await env.DB.prepare("SELECT COUNT(*) AS count FROM posts").first();
+      const publicTotal = await env.DB.prepare(
+        "SELECT COUNT(*) AS count FROM posts WHERE COALESCE(is_public, 1) = 1"
+      ).first();
+      const recent = await env.DB.prepare(`
+        SELECT id, title, body, type, images, video_url, tags, is_public, is_pinned, created_at, updated_at
+        FROM posts
+        ORDER BY COALESCE(is_pinned, 0) DESC, datetime(created_at) DESC
+        LIMIT 3
+      `).all();
+
+      return postsJson({
+        db: Boolean(env.DB),
+        total_posts: total?.count ?? 0,
+        public_posts: publicTotal?.count ?? 0,
+        recent_posts: (recent.results || []).map(normalizePost)
+      });
+    }
+
     if (admin) {
       const authError = requireAdmin(request, env);
       if (authError) return authError;
     }
 
-    const limit = Math.min(toInt(url.searchParams.get("limit"), 30), admin ? 200 : 50);
-    const where = admin ? "" : "WHERE COALESCE(is_public, 1) = 1";
-    const order = admin
-      ? "ORDER BY id DESC"
-      : "ORDER BY COALESCE(is_pinned, 0) DESC, datetime(created_at) DESC, id DESC";
-
-    const { results } = await env.DB.prepare(`
-      SELECT
-        id,
-        title,
-        body,
-        type,
-        images,
-        video_url,
-        tags,
-        COALESCE(is_public, 1) AS is_public,
-        COALESCE(is_pinned, 0) AS is_pinned,
-        created_at,
-        updated_at
+    const sql = admin ? `
+      SELECT id, title, body, type, images, video_url, tags, is_public, is_pinned, created_at, updated_at
       FROM posts
-      ${where}
-      ${order}
-      LIMIT ?
-    `).bind(limit).all();
+      ORDER BY COALESCE(is_pinned, 0) DESC, datetime(created_at) DESC
+    ` : `
+      SELECT id, title, body, type, images, video_url, tags, is_public, is_pinned, created_at, updated_at
+      FROM posts
+      WHERE COALESCE(is_public, 1) = 1
+      ORDER BY COALESCE(is_pinned, 0) DESC, datetime(created_at) DESC
+    `;
 
-    return json({
-      posts: (results || []).map((row) => normalizeJsonArrays(row, ["images", "tags"]))
+    const { results } = await env.DB.prepare(sql).all();
+    return postsJson({
+      posts: (results || []).map(normalizePost)
     });
   } catch (error) {
-    return json({ error: error.message || String(error) }, 500);
+    return postsJson({ error: error.message || String(error) }, 500);
   }
 }
 
