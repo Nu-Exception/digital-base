@@ -45,83 +45,90 @@ export function createResourceHandlers(config) {
 
   function validate(values) {
     const missing = required.filter((field) => !String(values[field] || "").trim());
-    if (missing.length) {
-      return `${missing.join(", ")} 不能为空`;
-    }
-    return "";
+    return missing.length ? `${missing.join(", ")} 不能为空` : "";
   }
 
   return {
     async get({ request, env }) {
-      const dbError = requireDb(env);
-      if (dbError) return dbError;
+      try {
+        const dbError = requireDb(env);
+        if (dbError) return dbError;
 
-      const url = new URL(request.url);
-      const admin = url.searchParams.get("admin") === "1";
-      if (admin) {
-        const authError = requireAdmin(request, env);
-        if (authError) return authError;
+        const url = new URL(request.url);
+        const admin = url.searchParams.get("admin") === "1";
+        if (admin) {
+          const authError = requireAdmin(request, env);
+          if (authError) return authError;
+        }
+        const limit = Math.min(toInt(url.searchParams.get("limit"), 100), admin ? 500 : 100);
+        const rows = await listItems(env, table, { admin, limit, order, jsonFields });
+        return json({ [listKey]: rows });
+      } catch (error) {
+        return json({ error: error.message || String(error) }, 500);
       }
-      const limit = Math.min(toInt(url.searchParams.get("limit"), 100), admin ? 500 : 100);
-      const rows = await listItems(env, table, {
-        admin,
-        limit,
-        order,
-        jsonFields
-      });
-      return json({ [listKey]: rows });
     },
 
     async post({ request, env }) {
-      const dbError = requireDb(env);
-      if (dbError) return dbError;
-      const authError = requireAdmin(request, env);
-      if (authError) return authError;
+      try {
+        const dbError = requireDb(env);
+        if (dbError) return dbError;
+        const authError = requireAdmin(request, env);
+        if (authError) return authError;
 
-      const body = await readJson(request);
-      const defaults = fields.reduce((acc, field) => {
-        acc[field] = "";
-        if (field === "tags") acc[field] = "";
-        if (field === "sort_order") acc[field] = 0;
-        if (field === "is_public") acc[field] = 1;
-        return acc;
-      }, {});
-      const values = normalize(body, defaults);
-      const error = validate(values);
-      if (error) return json({ error }, 400);
-      const result = await createItem(env, table, fields, values);
-      return json({ ok: true, id: result.meta.last_row_id }, 201);
+        const body = await readJson(request);
+        const defaults = fields.reduce((acc, field) => {
+          acc[field] = "";
+          if (field === "sort_order") acc[field] = 0;
+          if (field === "is_public") acc[field] = 1;
+          return acc;
+        }, {});
+        const values = normalize(body, defaults);
+        const error = validate(values);
+        if (error) return json({ error }, 400);
+        const result = await createItem(env, table, fields, values);
+        return json({ ok: true, id: result.meta.last_row_id }, 201);
+      } catch (error) {
+        return json({ error: error.message || String(error) }, 500);
+      }
     },
 
     async put({ request, env }) {
-      const dbError = requireDb(env);
-      if (dbError) return dbError;
-      const authError = requireAdmin(request, env);
-      if (authError) return authError;
+      try {
+        const dbError = requireDb(env);
+        if (dbError) return dbError;
+        const authError = requireAdmin(request, env);
+        if (authError) return authError;
 
-      const body = await readJson(request);
-      const id = getId(request, body);
-      if (!id) return json({ error: "缺少 id" }, 400);
-      const values = normalize(body);
-      const error = validate({ ...body, ...values });
-      if (required.some((field) => Object.prototype.hasOwnProperty.call(values, field)) && error) {
-        return json({ error }, 400);
+        const body = await readJson(request);
+        const id = getId(request, body);
+        if (!id) return json({ error: "缺少 id" }, 400);
+        const values = normalize(body);
+        const error = validate({ ...body, ...values });
+        if (required.some((field) => Object.prototype.hasOwnProperty.call(values, field)) && error) {
+          return json({ error }, 400);
+        }
+        await updateItem(env, table, id, values);
+        return json({ ok: true });
+      } catch (error) {
+        return json({ error: error.message || String(error) }, 500);
       }
-      await updateItem(env, table, id, values);
-      return json({ ok: true });
     },
 
     async delete({ request, env }) {
-      const dbError = requireDb(env);
-      if (dbError) return dbError;
-      const authError = requireAdmin(request, env);
-      if (authError) return authError;
+      try {
+        const dbError = requireDb(env);
+        if (dbError) return dbError;
+        const authError = requireAdmin(request, env);
+        if (authError) return authError;
 
-      const body = await readJson(request);
-      const id = getId(request, body);
-      if (!id) return json({ error: "缺少 id" }, 400);
-      await deleteItem(env, table, id);
-      return json({ ok: true });
+        const body = await readJson(request);
+        const id = getId(request, body);
+        if (!id) return json({ error: "缺少 id" }, 400);
+        await deleteItem(env, table, id);
+        return json({ ok: true });
+      } catch (error) {
+        return json({ error: error.message || String(error) }, 500);
+      }
     }
   };
 }

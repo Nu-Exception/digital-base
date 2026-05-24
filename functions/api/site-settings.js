@@ -14,35 +14,41 @@ const SETTING_KEYS = [
 ];
 
 export async function onRequestGet({ env }) {
-  const dbError = requireDb(env);
-  if (dbError) return dbError;
+  try {
+    const dbError = requireDb(env);
+    if (dbError) return dbError;
 
-  const { results } = await env.DB.prepare(
-    "SELECT key, value FROM site_settings"
-  ).all();
-  const settings = {};
-  (results || []).forEach((row) => {
-    settings[row.key] = row.value;
-  });
-  return json({ settings });
+    const { results } = await env.DB.prepare("SELECT key, value FROM site_settings").all();
+    const settings = {};
+    (results || []).forEach((row) => {
+      settings[row.key] = row.value;
+    });
+    return json({ settings });
+  } catch (error) {
+    return json({ error: error.message || String(error) }, 500);
+  }
 }
 
 export async function onRequestPut({ request, env }) {
-  const dbError = requireDb(env);
-  if (dbError) return dbError;
-  const authError = requireAdmin(request, env);
-  if (authError) return authError;
+  try {
+    const dbError = requireDb(env);
+    if (dbError) return dbError;
+    const authError = requireAdmin(request, env);
+    if (authError) return authError;
 
-  const body = await readJson(request);
-  const statements = SETTING_KEYS
-    .filter((key) => Object.prototype.hasOwnProperty.call(body, key))
-    .map((key) => env.DB.prepare(
-      "INSERT INTO site_settings (key, value, updated_at) VALUES (?, ?, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')"
-    ).bind(key, String(body[key] || "")));
+    const body = await readJson(request);
+    const statements = SETTING_KEYS
+      .filter((key) => Object.prototype.hasOwnProperty.call(body, key))
+      .map((key) => env.DB.prepare(
+        "INSERT INTO site_settings (key, value, updated_at) VALUES (?, ?, datetime('now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = datetime('now')"
+      ).bind(key, String(body[key] || "")));
 
-  if (!statements.length) return json({ error: "没有可保存的设置" }, 400);
-  await env.DB.batch(statements);
-  return json({ ok: true });
+    if (!statements.length) return json({ error: "没有可保存的设置" }, 400);
+    await env.DB.batch(statements);
+    return json({ ok: true });
+  } catch (error) {
+    return json({ error: error.message || String(error) }, 500);
+  }
 }
 
 export function onRequestPost(context) {

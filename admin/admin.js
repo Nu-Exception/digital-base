@@ -140,6 +140,22 @@ function setHint(el, text, type = "") {
   el.className = `hint ${type}`.trim();
 }
 
+function notify(text, type = "ok") {
+  setHint($("#globalHint"), text, type);
+}
+
+async function withButtonLoading(button, loadingText, task) {
+  const oldText = button.textContent;
+  button.disabled = true;
+  button.textContent = loadingText;
+  try {
+    return await task();
+  } finally {
+    button.disabled = false;
+    button.textContent = oldText;
+  }
+}
+
 function showLoggedIn(loggedIn) {
   $("#loginHero").classList.toggle("hidden", loggedIn);
   $("#loginPanel").classList.toggle("hidden", loggedIn);
@@ -153,7 +169,7 @@ function showLoggedIn(loggedIn) {
 async function apiJson(url, options = {}) {
   const headers = { "Content-Type": "application/json", ...(options.headers || {}) };
   if (getToken()) headers.Authorization = `Bearer ${getToken()}`;
-  const res = await fetch(url, { ...options, headers });
+  const res = await fetch(url, { ...options, headers, cache: "no-store" });
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error(data.error || `请求失败：${res.status}`);
   return data;
@@ -215,6 +231,7 @@ function sectionShell(kicker, title, body) {
           <h2>${title}</h2>
         </div>
       </div>
+      <p class="hint" id="globalHint"></p>
       ${body}
     </section>
   `;
@@ -282,14 +299,19 @@ async function renderSiteSettings() {
   `);
   $("#siteForm").addEventListener("submit", async (event) => {
     event.preventDefault();
+    const button = event.submitter || $("#siteForm button[type='submit']");
     const payload = {};
     fields.forEach(([name]) => payload[name] = getInputValue(name));
-    try {
+    await withButtonLoading(button, "保存中...", async () => {
+      try {
       await apiJson("/api/site-settings", { method: "PUT", body: JSON.stringify(payload) });
       setHint($("#siteHint"), "首页设置已保存，刷新前台可查看效果。", "ok");
-    } catch (error) {
+      notify("首页设置保存成功。", "ok");
+      } catch (error) {
       setHint($("#siteHint"), error.message, "bad");
-    }
+      notify(`请求失败：${error.message}`, "bad");
+      }
+    });
   });
 }
 
@@ -396,19 +418,25 @@ function bindResourceForm(key) {
   const config = configs[key];
   $("#resourceForm").addEventListener("submit", async (event) => {
     event.preventDefault();
+    const button = event.submitter || $("#resourceForm button[type='submit']");
     const id = getInputValue("id");
     const payload = {};
     config.fields.forEach(([name]) => payload[name] = getInputValue(name));
-    try {
-      await apiJson(config.endpoint, {
+    await withButtonLoading(button, "保存中...", async () => {
+      try {
+      const url = id ? `${config.endpoint}?id=${encodeURIComponent(id)}` : config.endpoint;
+      await apiJson(url, {
         method: id ? "PUT" : "POST",
-        body: JSON.stringify(id ? { ...payload, id: Number(id) } : payload)
+        body: JSON.stringify(payload)
       });
       state.editing[key] = null;
       await renderResourceManager(key);
-    } catch (error) {
+      notify(id ? "保存成功，列表已刷新。" : "新增成功，列表已刷新。", "ok");
+      } catch (error) {
       setHint($("#resourceHint"), error.message, "bad");
-    }
+      notify(`请求失败：${error.message}`, "bad");
+      }
+    });
   });
   $("#cancelEdit")?.addEventListener("click", () => {
     state.editing[key] = null;
@@ -453,15 +481,29 @@ async function refreshResourceList(key) {
       await renderResourceManager(key);
       return;
     }
-    if (action === "delete") {
-      if (!confirm("确认删除？此操作不可恢复。")) return;
-      await apiJson(config.endpoint, { method: "DELETE", body: JSON.stringify({ id }) });
-    }
-    if (action === "toggle") {
-      await apiJson(config.endpoint, { method: "PUT", body: JSON.stringify({ id, is_public: Number(button.dataset.value) }) });
-    }
-    if (action === "pin") {
-      await apiJson(config.endpoint, { method: "PUT", body: JSON.stringify({ id, is_pinned: Number(button.dataset.value) }) });
+    try {
+      if (action === "delete") {
+        if (!confirm("确认删除？此操作不可恢复。")) return;
+        await withButtonLoading(button, "删除中...", async () => {
+          await apiJson(`${config.endpoint}?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+          notify("删除成功，列表已刷新。", "ok");
+        });
+      }
+      if (action === "toggle") {
+        await withButtonLoading(button, "保存中...", async () => {
+          await apiJson(`${config.endpoint}?id=${encodeURIComponent(id)}`, { method: "PUT", body: JSON.stringify({ is_public: Number(button.dataset.value) }) });
+          notify(Number(button.dataset.value) ? "已设为显示。" : "已隐藏。", "ok");
+        });
+      }
+      if (action === "pin") {
+        await withButtonLoading(button, "保存中...", async () => {
+          await apiJson(`${config.endpoint}?id=${encodeURIComponent(id)}`, { method: "PUT", body: JSON.stringify({ is_pinned: Number(button.dataset.value) }) });
+          notify(Number(button.dataset.value) ? "已置顶。" : "已取消置顶。", "ok");
+        });
+      }
+    } catch (error) {
+      notify(`请求失败：${error.message}`, "bad");
+      return;
     }
     await refreshResourceList(key);
   };
@@ -492,11 +534,25 @@ async function renderMessagesManager() {
     const button = event.target.closest("button[data-action]");
     if (!button) return;
     const id = Number(button.dataset.id);
-    if (button.dataset.action === "delete") {
-      if (!confirm("确认删除这条留言？")) return;
-      await apiJson("/api/messages", { method: "DELETE", body: JSON.stringify({ id }) });
-    } else {
-      await apiJson("/api/messages", { method: "PUT", body: JSON.stringify({ id, is_public: Number(button.dataset.value) }) });
+    try {
+      if (button.dataset.action === "delete") {
+        if (!confirm("确认删除这条留言？")) return;
+        await withButtonLoading(button, "删除中...", async () => {
+          await apiJson(`/api/messages?id=${encodeURIComponent(id)}`, { method: "DELETE" });
+          notify("留言已删除。", "ok");
+        });
+      } else {
+        await withButtonLoading(button, "保存中...", async () => {
+          await apiJson(`/api/messages?id=${encodeURIComponent(id)}`, {
+            method: "PUT",
+            body: JSON.stringify({ is_public: Number(button.dataset.value) })
+          });
+          notify(Number(button.dataset.value) ? "留言已显示。" : "留言已隐藏。", "ok");
+        });
+      }
+    } catch (error) {
+      notify(`请求失败：${error.message}`, "bad");
+      return;
     }
     await renderMessagesManager();
   };

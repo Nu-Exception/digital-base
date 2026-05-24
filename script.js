@@ -13,6 +13,7 @@ async function getData() {
 
 async function apiJson(url, options) {
   const res = await fetch(url, {
+    cache: "no-store",
     headers: { "Content-Type": "application/json", ...(options?.headers || {}) },
     ...options
   });

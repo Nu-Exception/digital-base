@@ -136,57 +136,69 @@ export async function onRequestGet({ request, env }) {
 }
 
 export async function onRequestPost({ request, env }) {
-  const dbError = requireDb(env);
-  if (dbError) return dbError;
-  const authError = requireAdmin(request, env);
-  if (authError) return authError;
+  try {
+    const dbError = requireDb(env);
+    if (dbError) return dbError;
+    const authError = requireAdmin(request, env);
+    if (authError) return authError;
 
-  const body = await readJson(request);
-  const values = normalizeInput({
-    ...body,
-    images: body.images ?? "",
-    tags: body.tags ?? "",
-    video_url: body.video_url ?? "",
-    type: body.type || "文字",
-    is_public: body.is_public ?? 1,
-    is_pinned: body.is_pinned ?? 0
-  });
+    const body = await readJson(request);
+    const values = normalizeInput({
+      ...body,
+      images: body.images ?? "",
+      tags: body.tags ?? "",
+      video_url: body.video_url ?? "",
+      type: body.type || "文字",
+      is_public: body.is_public ?? 1,
+      is_pinned: body.is_pinned ?? 0
+    });
 
-  if (!values.title || !values.body) return json({ error: "标题和正文不能为空" }, 400);
-  if (!POST_TYPES.has(values.type)) return json({ error: "动态类型不正确" }, 400);
+    if (!values.title || !values.body) return json({ error: "标题和正文不能为空" }, 400);
+    if (!POST_TYPES.has(values.type)) return json({ error: "动态类型不正确" }, 400);
 
-  const fields = ["title", "body", "type", "images", "video_url", "tags", "is_public", "is_pinned"];
-  const result = await createItem(env, "posts", fields, values);
-  return json({ ok: true, id: result.meta.last_row_id }, 201);
+    const fields = ["title", "body", "type", "images", "video_url", "tags", "is_public", "is_pinned"];
+    const result = await createItem(env, "posts", fields, values);
+    return json({ ok: true, id: result.meta.last_row_id }, 201);
+  } catch (error) {
+    return json({ error: error.message || String(error) }, 500);
+  }
 }
 
 export async function onRequestPut({ request, env }) {
-  const dbError = requireDb(env);
-  if (dbError) return dbError;
-  const authError = requireAdmin(request, env);
-  if (authError) return authError;
+  try {
+    const dbError = requireDb(env);
+    if (dbError) return dbError;
+    const authError = requireAdmin(request, env);
+    if (authError) return authError;
 
-  const body = await readJson(request);
-  const id = getId(request, body);
-  if (!id) return json({ error: "缺少 id" }, 400);
+    const body = await readJson(request);
+    const id = getId(request, body);
+    if (!id) return json({ error: "缺少 id" }, 400);
 
-  const values = normalizeInput(body);
-  if (values.type && !POST_TYPES.has(values.type)) return json({ error: "动态类型不正确" }, 400);
-  await updateItem(env, "posts", id, values);
-  return json({ ok: true });
+    const values = normalizeInput(body);
+    if (values.type && !POST_TYPES.has(values.type)) return json({ error: "动态类型不正确" }, 400);
+    await updateItem(env, "posts", id, values);
+    return json({ ok: true });
+  } catch (error) {
+    return json({ error: error.message || String(error) }, 500);
+  }
 }
 
 export async function onRequestDelete({ request, env }) {
-  const dbError = requireDb(env);
-  if (dbError) return dbError;
-  const authError = requireAdmin(request, env);
-  if (authError) return authError;
+  try {
+    const dbError = requireDb(env);
+    if (dbError) return dbError;
+    const authError = requireAdmin(request, env);
+    if (authError) return authError;
 
-  const body = await readJson(request);
-  const id = getId(request, body);
-  if (!id) return json({ error: "缺少 id" }, 400);
-  await deleteItem(env, "posts", id);
-  return json({ ok: true });
+    const body = await readJson(request);
+    const id = getId(request, body);
+    if (!id) return json({ error: "缺少 id" }, 400);
+    await deleteItem(env, "posts", id);
+    return json({ ok: true });
+  } catch (error) {
+    return json({ error: error.message || String(error) }, 500);
+  }
 }
 
 export function onRequestPatch(context) {
