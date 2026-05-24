@@ -1,5 +1,5 @@
 import { createResourceHandlers } from "../_lib/resource.js";
-import { json, requireDb, toInt } from "../_lib/cms.js";
+import { json, requireDb } from "../_lib/cms.js";
 
 const handlers = createResourceHandlers({
   table: "projects",
@@ -10,44 +10,9 @@ const handlers = createResourceHandlers({
   order: "sort_order ASC, id DESC"
 });
 
-function parseArray(value) {
-  if (Array.isArray(value)) return value;
-  if (!value) return [];
-  try {
-    const parsed = JSON.parse(value);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return String(value)
-      .split(",")
-      .map((item) => item.trim())
-      .filter(Boolean);
-  }
-}
-
-function normalizeProject(row) {
-  return {
-    ...row,
-    tags: parseArray(row.tags)
-  };
-}
-
 async function getProjectColumns(env) {
   const { results } = await env.DB.prepare("PRAGMA table_info(projects)").all();
   return (results || []).map((column) => column.name);
-}
-
-function buildVisibilityWhere(columns) {
-  const visibilityFields = ["is_public", "visible", "is_visible"].filter((field) => columns.includes(field));
-  if (!visibilityFields.length) return "";
-  return `WHERE (${visibilityFields.map((field) => `CAST(COALESCE(${field}, 0) AS INTEGER) = 1`).join(" OR ")})`;
-}
-
-function buildOrderBy(columns) {
-  const parts = [];
-  if (columns.includes("sort_order")) parts.push("CAST(COALESCE(sort_order, 0) AS INTEGER) ASC");
-  if (columns.includes("created_at")) parts.push("datetime(created_at) DESC");
-  parts.push("id DESC");
-  return parts.join(", ");
 }
 
 export async function onRequestGet({ request, env }) {
@@ -57,7 +22,6 @@ export async function onRequestGet({ request, env }) {
 
     const url = new URL(request.url);
     const debug = url.searchParams.get("debug") === "1";
-    const limit = Math.min(toInt(url.searchParams.get("limit"), 100), 500);
     const table = await env.DB.prepare(
       "SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'projects'"
     ).first();
@@ -71,10 +35,9 @@ export async function onRequestGet({ request, env }) {
 
     const columns = await getProjectColumns(env);
     const total = await env.DB.prepare("SELECT COUNT(*) AS count FROM projects").first();
-    const orderBy = buildOrderBy(columns);
 
     if (debug) {
-      const recent = await env.DB.prepare(`SELECT * FROM projects ORDER BY ${orderBy} LIMIT 5`).all();
+      const recent = await env.DB.prepare("SELECT * FROM projects ORDER BY sort_order ASC, id DESC LIMIT 5").all();
       return json({
         table_exists,
         columns,
@@ -83,12 +46,12 @@ export async function onRequestGet({ request, env }) {
       });
     }
 
-    const where = buildVisibilityWhere(columns);
+    const where = columns.includes("is_public") ? "WHERE (is_public = 1 OR is_public IS NULL)" : "";
     const { results } = await env.DB.prepare(
-      `SELECT * FROM projects ${where} ORDER BY ${orderBy} LIMIT ?`
-    ).bind(limit).all();
+      `SELECT * FROM projects ${where} ORDER BY sort_order ASC, id DESC`
+    ).all();
 
-    return json({ projects: (results || []).map(normalizeProject) });
+    return json({ projects: results || [] });
   } catch (error) {
     return json({ error: error.message || String(error) }, 500);
   }
