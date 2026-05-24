@@ -41,22 +41,30 @@
       },
       {
         "label": "Plan",
-        "value": "GitHub 上传 -> Pages 部署 -> 绑定域名"
+        "value": "GitHub 上传 -> Pages 部署 -> 线上自动更新"
       }
     ]
   },
   "updates": [
     {
+      "time": "2026-05-24",
+      "title": "第一阶段轻功能",
+      "description": "完成移动端菜单、书签分类筛选、精选视频入口和紧凑动态卡片。"
+    },
+    {
       "time": "Today",
-      "text": "重排首页：顶部导航、大轮播、横向视频入口、下方模块卡片。"
+      "title": "Cloudflare Pages 已部署",
+      "description": "先保持 Pages 默认域名，不急着绑定自定义域名。"
     },
     {
       "time": "Next",
-      "text": "继续完善我的导航页，把常用网站和工具集中管理。"
+      "title": "继续补收藏",
+      "description": "后续把常用网站按 AI工具、游戏、开发、视频、素材、常用持续整理。"
     },
     {
-      "time": "Future",
-      "text": "如果后续需要互动留言，再考虑 Cloudflare D1 / Workers。"
+      "time": "Later",
+      "title": "互动功能预留",
+      "description": "如果之后要真实留言板，再考虑 Cloudflare D1 / Workers。"
     }
   ],
   "quickLinks": [
@@ -116,7 +124,7 @@
     },
     {
       "name": "老王",
-      "text": "书签区很实用，建议以后按开发、素材、AI、游戏继续分组。"
+      "text": "书签区很实用，建议以后继续补常用工具。"
     },
     {
       "name": "站长",
@@ -146,7 +154,7 @@
     },
     {
       "name": "FreeDomain Notes",
-      "description": "免费域名和 DNS 相关记录，可以用于给数字基地绑定个性域名。",
+      "description": "免费域名和 DNS 相关记录，可以用于后续给数字基地绑定个性域名。",
       "tags": [
         "Domain",
         "DNS",
@@ -174,20 +182,28 @@
       "cover": "https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=1000&q=85"
     },
     {
-      "title": "更多内容",
-      "description": "真正的视频列表由旧项目承接，这里不重复堆内容。",
-      "game": "GAME",
-      "length": "MORE",
-      "url": "https://github.com/",
-      "cover": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1000&q=85"
-    },
-    {
-      "title": "直播 / 回放占位",
+      "title": "直播 / 回放入口",
       "description": "以后可以放直播间、回放合集或频道主页。",
       "game": "LIVE",
       "length": "SOON",
       "url": "https://github.com/",
       "cover": "https://images.unsplash.com/photo-1511882150382-421056c89033?auto=format&fit=crop&w=1000&q=85"
+    },
+    {
+      "title": "游戏频道主页",
+      "description": "放一个频道主页入口，作为内容总站跳转。",
+      "game": "CHANNEL",
+      "length": "OUT",
+      "url": "https://github.com/",
+      "cover": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=1000&q=85"
+    },
+    {
+      "title": "剪辑合集占位",
+      "description": "预留给以后最常看的剪辑合集链接。",
+      "game": "CUTS",
+      "length": "LIST",
+      "url": "https://github.com/",
+      "cover": "https://images.unsplash.com/photo-1560253023-3ec5d502959f?auto=format&fit=crop&w=1000&q=85"
     }
   ],
   "resources": [
@@ -230,22 +246,16 @@
   ],
   "bookmarks": [
     {
-      "category": "部署",
-      "name": "Cloudflare Dashboard",
-      "description": "Pages、Workers、DNS、R2 都在这里管理。",
-      "url": "https://dash.cloudflare.com/"
-    },
-    {
-      "category": "代码",
-      "name": "GitHub",
-      "description": "项目仓库、提交记录、Issues 和自动部署入口。",
-      "url": "https://github.com/"
-    },
-    {
-      "category": "AI",
+      "category": "AI工具",
       "name": "ChatGPT",
       "description": "写代码、想方案、改文案、做项目规划。",
       "url": "https://chatgpt.com/"
+    },
+    {
+      "category": "AI工具",
+      "name": "Perplexity",
+      "description": "适合快速查资料、整理链接和做信息检索。",
+      "url": "https://www.perplexity.ai/"
     },
     {
       "category": "游戏",
@@ -254,16 +264,40 @@
       "url": "https://store.steampowered.com/"
     },
     {
+      "category": "游戏",
+      "name": "Epic Games",
+      "description": "游戏领取、商城活动和账号库入口。",
+      "url": "https://store.epicgames.com/"
+    },
+    {
+      "category": "开发",
+      "name": "GitHub",
+      "description": "项目仓库、提交记录、Issues 和自动部署入口。",
+      "url": "https://github.com/"
+    },
+    {
+      "category": "开发",
+      "name": "Cloudflare Dashboard",
+      "description": "Pages、Workers、DNS、R2 都在这里管理。",
+      "url": "https://dash.cloudflare.com/"
+    },
+    {
+      "category": "开发",
+      "name": "MDN Web Docs",
+      "description": "HTML、CSS、JavaScript 文档和兼容性查询。",
+      "url": "https://developer.mozilla.org/"
+    },
+    {
       "category": "视频",
       "name": "Bilibili",
       "description": "视频发布、学习资料、游戏内容参考。",
       "url": "https://www.bilibili.com/"
     },
     {
-      "category": "工具",
-      "name": "Temp Mail",
-      "description": "临时邮箱工具，用于测试注册和收件。",
-      "url": "https://tempmail.plus/zh/"
+      "category": "视频",
+      "name": "YouTube",
+      "description": "视频频道、教程、游戏剪辑和直播回放。",
+      "url": "https://www.youtube.com/"
     },
     {
       "category": "素材",
@@ -272,22 +306,22 @@
       "url": "https://unsplash.com/"
     },
     {
-      "category": "工具",
+      "category": "素材",
+      "name": "Pexels",
+      "description": "免费图片和视频素材备用入口。",
+      "url": "https://www.pexels.com/"
+    },
+    {
+      "category": "常用",
+      "name": "Temp Mail",
+      "description": "临时邮箱工具，用于测试注册和收件。",
+      "url": "https://tempmail.plus/zh/"
+    },
+    {
+      "category": "常用",
       "name": "JSON Formatter",
       "description": "检查和格式化 data/site.json，避免部署后页面读取失败。",
       "url": "https://jsonformatter.org/"
-    },
-    {
-      "category": "学习",
-      "name": "MDN Web Docs",
-      "description": "HTML、CSS、JavaScript 文档和兼容性查询。",
-      "url": "https://developer.mozilla.org/"
-    },
-    {
-      "category": "备用",
-      "name": "更多收藏占位",
-      "description": "后续可以继续把自己的网页书签添加到这里。",
-      "url": "#bookmarks"
     }
   ]
 }

@@ -2,6 +2,7 @@ const $ = (selector) => document.querySelector(selector);
 
 let siteData = {};
 let bookmarkCategory = "全部";
+const BOOKMARK_CATEGORIES = ["AI工具", "游戏", "开发", "视频", "素材", "常用"];
 
 async function getData() {
   const res = await fetch("./data/site.json", { cache: "no-store" });
@@ -83,7 +84,13 @@ function renderStatus(data) {
   `).join("");
 
   $("#updates").innerHTML = (data.updates || []).map((item) => `
-    <div><strong>${escapeHtml(item.time)}</strong><p>${escapeHtml(item.text)}</p></div>
+    <div class="update-item">
+      <div class="update-top">
+        <strong>${escapeHtml(item.time)}</strong>
+        <span>${escapeHtml(item.title || item.text || "")}</span>
+      </div>
+      <p>${escapeHtml(item.description || item.text || "")}</p>
+    </div>
   `).join("");
 }
 
@@ -130,7 +137,7 @@ function renderProjects(data) {
 
 function renderVideos(data) {
   $("#mainVideoLink").href = data.videoSiteUrl || "#portal";
-  $("#videoRow").innerHTML = (data.videos || []).map((video) => `
+  $("#videoRow").innerHTML = (data.videos || []).slice(0, 6).map((video) => `
     <a class="video-card" href="${attr(video.url)}" target="_blank" rel="noreferrer" style='--cover:url("${attr(video.cover)}")'>
       <div class="video-card-content">
         <h3>${escapeHtml(video.title)}</h3>
@@ -155,18 +162,23 @@ function renderResources(data) {
 }
 
 function renderBookmarkFilter(data) {
-  const categories = ["全部", ...new Set((data.bookmarks || []).map((item) => item.category).filter(Boolean))];
+  const present = new Set((data.bookmarks || []).map((item) => item.category).filter(Boolean));
+  const categories = ["全部", ...BOOKMARK_CATEGORIES.filter((category) => present.has(category))];
+  if (!categories.includes(bookmarkCategory)) {
+    bookmarkCategory = "全部";
+  }
+
   $("#bookmarkFilter").innerHTML = categories.map((category) => `
     <button type="button" class="${category === bookmarkCategory ? "active" : ""}" data-category="${attr(category)}">${escapeHtml(category)}</button>
   `).join("");
 
-  $("#bookmarkFilter").addEventListener("click", (event) => {
+  $("#bookmarkFilter").onclick = (event) => {
     const button = event.target.closest("button");
     if (!button) return;
     bookmarkCategory = button.dataset.category;
     renderBookmarks(siteData);
     renderBookmarkFilter(siteData);
-  }, { once: true });
+  };
 }
 
 function renderBookmarks(data) {
