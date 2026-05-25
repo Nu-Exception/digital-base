@@ -528,11 +528,13 @@ async function loadProjects(data) {
 }
 
 function normalizeVideo(video = {}) {
+  const cover = normalizeUrl(video.cover || video.image || "");
+  const url = normalizeUrl(video.url || video.link || video.video_url);
   return {
     title: video.title || video.name || "视频入口",
     description: video.description || video.body || "",
-    url: normalizeUrl(video.url || video.link || video.video_url),
-    cover: video.cover || video.image || "",
+    url,
+    cover,
     tags: normalizeArray(video.tags),
     category: video.category || "",
     game: video.game || "",
@@ -543,9 +545,74 @@ function normalizeVideo(video = {}) {
   };
 }
 
+function isDirectImageUrl(url = "") {
+  return /\.(jpe?g|png|webp|gif)(\?.*)?$/i.test(String(url).trim());
+}
+
+function getYouTubeId(url = "") {
+  const value = String(url || "").trim();
+  const patterns = [
+    /youtube\.com\/watch\?.*?[?&]?v=([^&]+)/i,
+    /youtu\.be\/([^?&/]+)/i,
+    /youtube\.com\/shorts\/([^?&/]+)/i,
+    /youtube\.com\/embed\/([^?&/]+)/i
+  ];
+  const match = patterns.map((pattern) => value.match(pattern)).find(Boolean);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
+function isBilibiliUrl(url = "") {
+  return /(?:bilibili\.com\/video\/|b23\.tv\/)/i.test(String(url));
+}
+
+function resolveVideoCover(inputUrl = "", fallbackTitle = "视频入口") {
+  const url = normalizeUrl(inputUrl);
+  if (isDirectImageUrl(url)) return { type: "image", src: url, title: fallbackTitle };
+
+  const youtubeId = getYouTubeId(url);
+  if (youtubeId) {
+    return {
+      type: "youtube",
+      src: `https://img.youtube.com/vi/${attr(youtubeId)}/maxresdefault.jpg`,
+      fallback: `https://img.youtube.com/vi/${attr(youtubeId)}/hqdefault.jpg`,
+      title: fallbackTitle
+    };
+  }
+
+  if (isBilibiliUrl(url)) return { type: "placeholder", badge: "BILIBILI", title: fallbackTitle };
+  return { type: "placeholder", badge: "VIDEO", title: fallbackTitle };
+}
+
+function videoCoverPlaceholderHTML(label = "VIDEO", title = "视频入口") {
+  return `
+    <div class="video-cover-placeholder">
+      <span class="video-cover-badge">${escapeHtml(label)}</span>
+      <span class="video-cover-play" aria-hidden="true"></span>
+      <strong>${escapeHtml(title)}</strong>
+    </div>
+  `;
+}
+
+function renderVideoCoverHTML(cover, title) {
+  const resolved = resolveVideoCover(cover, title);
+  if (resolved.type === "image") {
+    return `<img class="video-cover" src="${attr(resolved.src)}" alt="${escapeHtml(title)}" loading="lazy" onerror="this.outerHTML=window.videoCoverPlaceholderHTML('VIDEO', this.alt)" />`;
+  }
+  if (resolved.type === "youtube") {
+    return `<img class="video-cover" src="${attr(resolved.src)}" alt="${escapeHtml(title)}" loading="lazy" data-fallback="${attr(resolved.fallback)}" onerror="if(this.dataset.fallback){this.src=this.dataset.fallback;this.dataset.fallback='';}else{this.outerHTML=window.videoCoverPlaceholderHTML('VIDEO', this.alt)}" />`;
+  }
+  return videoCoverPlaceholderHTML(resolved.badge, title);
+}
+
+function getVideoOpenUrl(video) {
+  if (video.url) return video.url;
+  return video.cover && !isDirectImageUrl(video.cover) ? video.cover : "";
+}
+
 function renderVideoList(videos) {
   const normalized = videos.map(normalizeVideo);
-  const mainUrl = normalizeUrl(normalized.find((video) => video.url)?.url || "");
+  const mainItem = normalized.find((video) => getVideoOpenUrl(video));
+  const mainUrl = normalizeUrl(mainItem ? getVideoOpenUrl(mainItem) : "");
   const mainLink = $("#mainVideoLink");
   if (mainUrl) {
     mainLink.href = mainUrl;
@@ -556,10 +623,11 @@ function renderVideoList(videos) {
   $("#videoRow").innerHTML = normalized.length ? normalized.slice(0, 6).map((video) => {
     const tagA = video.tags[0] || video.category || video.game || "PORTAL";
     const tagB = video.tags[1] || video.length || "LINK";
-    const external = isExternalUrl(video.url);
+    const openUrl = getVideoOpenUrl(video);
+    const external = isExternalUrl(openUrl);
     return `
       <article class="video-card">
-        ${video.cover ? `<img class="video-cover" src="${attr(video.cover)}" alt="${escapeHtml(video.title)}" loading="lazy" onerror="this.remove()" />` : ""}
+        ${renderVideoCoverHTML(video.cover, video.title)}
         <div class="video-card-content">
           <h3>${escapeHtml(video.title)}</h3>
           <p>${escapeHtml(video.description)}</p>
@@ -567,7 +635,7 @@ function renderVideoList(videos) {
             <span class="tag">${escapeHtml(tagA)}</span>
             <span class="tag">${escapeHtml(tagB)}</span>
           </div>
-          ${video.url ? `<a class="btn compact video-open" href="${attr(video.url)}"${external ? ' target="_blank" rel="noreferrer"' : ""}>打开</a>` : ""}
+          ${openUrl ? `<a class="btn compact video-open" href="${attr(openUrl)}"${external ? ' target="_blank" rel="noreferrer"' : ""}>打开</a>` : ""}
         </div>
       </article>
     `;
@@ -585,6 +653,8 @@ async function loadVideos(data) {
     renderVideoList([]);
   }
 }
+
+window.videoCoverPlaceholderHTML = videoCoverPlaceholderHTML;
 
 function normalizeResource(resource = {}) {
   const cover = resource.cover || resource.image || "";
