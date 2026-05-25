@@ -7,6 +7,13 @@ let recentLogItems = [];
 let recentLogIndex = 0;
 let recentLogTimer = null;
 const BOOKMARK_CATEGORIES = ["AI工具", "游戏", "开发", "视频", "素材", "常用"];
+const STATUS_STATS = [
+  { key: "posts", label: "动态", url: "/api/posts" },
+  { key: "projects", label: "项目", url: "/api/projects" },
+  { key: "resources", label: "资源", url: "/api/resources" },
+  { key: "bookmarks", label: "导航", url: "/api/bookmarks" },
+  { key: "messages", label: "留言", url: "/api/messages" }
+];
 
 async function getData() {
   const res = await fetch("./data/site.json", { cache: "no-store" });
@@ -207,18 +214,45 @@ function setCarousel(slides) {
 function renderStatus() {
   $("#statusTitle").textContent = "基地在线";
   $("#statusText").innerHTML = '<span class="hud-pulse" aria-hidden="true"></span><span>ONLINE</span>';
+  renderStatusStats();
+}
+
+function formatSyncTime(date = new Date()) {
+  const pad = (value) => String(value).padStart(2, "0");
+  return `${date.getFullYear()}/${pad(date.getMonth() + 1)}/${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+function renderStatusStats(stats = {}) {
   $("#statusList").innerHTML = `
-    <div class="hud-row">
-      <span>最后更新</span>
-      <strong>2026/05/25</strong>
-    </div>
     <div class="hud-metrics">
-      <span>动态：<strong>5</strong></span>
-      <span>项目：<strong>4</strong></span>
-      <span>留言：<strong>1</strong></span>
+      ${STATUS_STATS.map((item) => `
+        <span>${item.label}：<strong>${Number(stats[item.key] || 0)}</strong></span>
+      `).join("")}
     </div>
-    <div class="hud-note">长期施工中...</div>
+    <div class="hud-row">
+      <span>最后同步</span>
+      <strong>${escapeHtml(stats.syncedAt || formatSyncTime())}</strong>
+    </div>
   `;
+}
+
+async function countStatusCollection(item) {
+  try {
+    const result = await apiJson(`${item.url}?t=${Date.now()}`);
+    return Array.isArray(result[item.key]) ? result[item.key].length : 0;
+  } catch (error) {
+    console.warn(`${item.url} 统计读取失败，显示 0。`, error);
+    return 0;
+  }
+}
+
+async function loadStatusStats() {
+  const counts = await Promise.all(STATUS_STATS.map(countStatusCollection));
+  const stats = STATUS_STATS.reduce((next, item, index) => {
+    next[item.key] = counts[index] || 0;
+    return next;
+  }, { syncedAt: formatSyncTime() });
+  renderStatusStats(stats);
 }
 
 function normalizeRecentItem(item = {}) {
@@ -829,6 +863,7 @@ getData()
     renderStatus(siteData);
     hideFriendsSection();
     await Promise.all([
+      loadStatusStats(),
       loadPosts(siteData),
       loadRecentLog(siteData),
       loadMessages(),

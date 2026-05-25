@@ -648,9 +648,7 @@ footer {
 }
 
 .status-panel .online-dot {
-  position: absolute;
-  top: 20px;
-  right: 18px;
+  display: none;
 }
 
 .feature-panel h2 {
@@ -750,6 +748,7 @@ footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 10px;
 }
 
 .hud-row span,
@@ -761,15 +760,20 @@ footer {
   margin-right: 0;
   font-family: "Arial", sans-serif;
   letter-spacing: .06em;
+  white-space: nowrap;
 }
 
 .hud-metrics {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 10px;
 }
 
 .hud-metrics span {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
   color: #c8d3df;
   white-space: nowrap;
 }
@@ -777,6 +781,7 @@ footer {
 .hud-metrics strong {
   color: var(--accent);
   margin-right: 0;
+  font-size: 15px;
 }
 
 .hud-note {

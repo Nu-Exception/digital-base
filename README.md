@@ -538,6 +538,8 @@ MIT
 
 首页 Status Panel 已改为游戏基地 HUD 风格，固定展示基地在线、ONLINE 呼吸灯、最后更新时间、动态/项目/留言数量和施工状态；卡片尺寸保持不变，不影响 Recent Log 和 Fast Links。
 
+首页 Status Panel 现在是动态统计 HUD：数量来自 `/api/posts`、`/api/projects`、`/api/resources`、`/api/bookmarks`、`/api/messages`，分别显示动态、项目、资源、导航、留言总数；新增或删除内容后刷新页面会自动重新统计，接口异常时对应数字显示 0。
+
 前台内容整体优先读取 CMS/API，无数据时显示空状态提示，避免继续展示默认占位假数据。
 
 留言板公开接口 `/api/messages` 会兼容 `is_public`、`visible`、`is_visible` 显示字段；后台留言管理点“显示”后，前台刷新或发布留言成功后会重新读取接口。可用 `/api/messages?debug=1` 检查表字段、总数和最近 5 条留言。
