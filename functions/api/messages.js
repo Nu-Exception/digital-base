@@ -15,20 +15,22 @@ async function getColumns(env) {
   return (results || []).map((column) => column.name);
 }
 
-function buildWhere(columns) {
-  const fields = ["is_public", "visible", "is_visible"].filter((field) => columns.includes(field));
-  if (!fields.length) return "";
-  const visibleChecks = fields
-    .map((field) => `(${field} = 1 OR ${field} = '1' OR ${field} = true OR ${field} IS NULL)`)
-    .join(" OR ");
-  return `WHERE (${visibleChecks})`;
-}
-
 function buildOrder(columns) {
   const parts = [];
   if (columns.includes("created_at")) parts.push("datetime(created_at) DESC");
   parts.push("id DESC");
   return parts.join(", ");
+}
+
+function getMessageSelect(columns) {
+  const fields = ["id", "nickname", "content", "created_at", "is_public"].filter((field) => columns.includes(field));
+  return fields.length ? fields.join(", ") : "*";
+}
+
+function isPublicMessage(row, hasPublicField) {
+  if (!hasPublicField) return true;
+  const value = row.is_public;
+  return value === 1 || value === "1" || value === true || value == 1 || value === null || value === undefined || value === "";
 }
 
 export async function onRequestGet({ request, env }) {
@@ -51,14 +53,23 @@ export async function onRequestGet({ request, env }) {
     const columns = await getColumns(env);
     const order = buildOrder(columns);
     const total = await env.DB.prepare("SELECT COUNT(*) AS count FROM messages").first();
+    const select = getMessageSelect(columns);
     if (debug) {
-      const recent = await env.DB.prepare(`SELECT * FROM messages ORDER BY ${order} LIMIT 5`).all();
-      return json({ table_exists, columns, total: total?.count ?? 0, recent: recent.results || [] });
+      const recent = await env.DB.prepare(`SELECT ${select} FROM messages ORDER BY ${order} LIMIT 5`).all();
+      const allRows = await env.DB.prepare(`SELECT ${select} FROM messages ORDER BY ${order} LIMIT 50`).all();
+      return json({
+        table_exists,
+        columns,
+        total: total?.count ?? 0,
+        recent: recent.results || [],
+        all_rows: allRows.results || []
+      });
     }
 
-    const where = admin ? "" : buildWhere(columns);
-    const { results } = await env.DB.prepare(`SELECT * FROM messages ${where} ORDER BY ${order} LIMIT ?`).bind(limit).all();
-    return json({ messages: results || [] });
+    const result = await env.DB.prepare(`SELECT ${select} FROM messages ORDER BY ${order} LIMIT ?`).bind(limit).all();
+    const rows = result.results || [];
+    const messages = admin ? rows : rows.filter((row) => isPublicMessage(row, columns.includes("is_public")));
+    return json({ messages });
   } catch (error) {
     return json({ error: error.message || String(error) }, 500);
   }
