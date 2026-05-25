@@ -204,15 +204,21 @@ function setCarousel(slides) {
   carouselTimer = window.setInterval(() => render((current + 1) % slides.length), 5600);
 }
 
-function renderStatus(data) {
-  const status = data.status || {};
-  const blockedLabels = new Set(["playing", "working", "mood", "plan"]);
-  const lines = (status.lines || []).filter((item) => !blockedLabels.has(String(item.label || "").trim().toLowerCase()));
-  $("#statusTitle").textContent = status.title || "基地状态：在线";
-  $("#statusText").textContent = status.text || "正在维护个人数字基地";
-  $("#statusList").innerHTML = lines.map((item) => `
-    <div><strong>${escapeHtml(item.label)}</strong>${escapeHtml(item.value)}</div>
-  `).join("");
+function renderStatus() {
+  $("#statusTitle").textContent = "基地在线";
+  $("#statusText").innerHTML = '<span class="hud-pulse" aria-hidden="true"></span><span>ONLINE</span>';
+  $("#statusList").innerHTML = `
+    <div class="hud-row">
+      <span>最后更新</span>
+      <strong>2026/05/25</strong>
+    </div>
+    <div class="hud-metrics">
+      <span>动态：<strong>5</strong></span>
+      <span>项目：<strong>4</strong></span>
+      <span>留言：<strong>1</strong></span>
+    </div>
+    <div class="hud-note">长期施工中...</div>
+  `;
 }
 
 function normalizeRecentItem(item = {}) {

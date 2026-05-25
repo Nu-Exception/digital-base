@@ -640,6 +640,13 @@ footer {
   padding: 18px;
 }
 
+.status-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+}
+
 .status-panel .online-dot {
   position: absolute;
   top: 20px;
@@ -649,6 +656,44 @@ footer {
 .feature-panel h2 {
   margin: 12px 0 10px;
   font-size: 23px;
+}
+
+.status-panel h2 {
+  margin: 10px 0 8px;
+  letter-spacing: .04em;
+}
+
+.feature-panel.status-panel > p {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #7cff9b;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .16em;
+}
+
+.hud-pulse {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #35f66f;
+  box-shadow: 0 0 0 0 rgba(53, 246, 111, .5), 0 0 14px rgba(53, 246, 111, .85);
+  animation: hudPulse 1.7s ease-in-out infinite;
+}
+
+@keyframes hudPulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(53, 246, 111, .46), 0 0 14px rgba(53, 246, 111, .8);
+    transform: scale(.92);
+  }
+
+  50% {
+    box-shadow: 0 0 0 6px rgba(53, 246, 111, 0), 0 0 20px rgba(53, 246, 111, 1);
+    transform: scale(1);
+  }
 }
 
 .feature-panel p,
@@ -686,10 +731,57 @@ footer {
   font-size: 13px;
 }
 
+.status-list {
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.status-list > div {
+  letter-spacing: .03em;
+}
+
 .status-list strong,
 .updates strong {
   color: #fff;
   margin-right: 6px;
+}
+
+.hud-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.hud-row span,
+.hud-note {
+  color: #9fb0c4;
+}
+
+.hud-row strong {
+  margin-right: 0;
+  font-family: "Arial", sans-serif;
+  letter-spacing: .06em;
+}
+
+.hud-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+}
+
+.hud-metrics span {
+  color: #c8d3df;
+  white-space: nowrap;
+}
+
+.hud-metrics strong {
+  color: var(--accent);
+  margin-right: 0;
+}
+
+.hud-note {
+  text-align: center;
+  font-weight: 800;
 }
 
 .updates p {
