@@ -1,589 +1,1039 @@
 # DIGITAL BASE V3
 
-> Cyber Style Personal Base  
-> 基于 Cloudflare Pages + Functions + D1 的个人数字基地
-
----
+> 一个部署在 **Cloudflare Pages + Functions + D1** 上的个人数字基地。  
+> 它不是单纯的静态主页，而是一个可以长期维护的个人内容平台：动态墙、项目展示、视频入口、资源站、导航收藏、留言板、CMS 后台都可以通过网页后台管理。
 
 <p align="center">
-
-一个持续搭建中的个人互动网站。  
-集成 CMS 后台、动态系统、项目展示、资源导航和 Cloudflare Functions API。
-
+  <img src="https://img.shields.io/badge/Cloudflare-Pages-F38020?style=for-the-badge&logo=cloudflare&logoColor=white" />
+  <img src="https://img.shields.io/badge/Database-D1-F38020?style=for-the-badge&logo=cloudflare&logoColor=white" />
+  <img src="https://img.shields.io/badge/Frontend-HTML%2FCSS%2FJS-222?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/CMS-Admin_Panel-ffd43b?style=for-the-badge" />
 </p>
 
 ---
 
-# 项目预览
+## 目录
 
-## 前台页面
-
-- 首页 Hero
-- 动态墙
-- 项目控制台
-- 视频入口
-- 资源导航
-- 游戏风 UI
-
----
-
-## CMS 后台
-
-支持在线管理：
-
-- 首页内容
-- 动态发布
-- 项目管理
-- 视频入口
-- 导航收藏
-- 资源站
-
-无需重新修改代码即可更新网站内容。
+- [项目介绍](#项目介绍)
+- [功能预览](#功能预览)
+- [使用前必须准备](#使用前必须准备)
+- [Cloudflare 账号与信用卡验证说明](#cloudflare-账号与信用卡验证说明)
+- [本地项目准备](#本地项目准备)
+- [GitHub 仓库准备](#github-仓库准备)
+- [Cloudflare Pages 部署](#cloudflare-pages-部署)
+- [创建 D1 数据库](#创建-d1-数据库)
+- [绑定 D1 数据库](#绑定-d1-数据库)
+- [初始化数据库表](#初始化数据库表)
+- [登录后台 CMS](#登录后台-cms)
+- [后台内容管理说明](#后台内容管理说明)
+- [视频入口封面规则](#视频入口封面规则)
+- [全站背景图设置](#全站背景图设置)
+- [留言板审核与显示](#留言板审核与显示)
+- [常用测试地址](#常用测试地址)
+- [常见问题与解决方法](#常见问题与解决方法)
+- [更新项目的推荐流程](#更新项目的推荐流程)
+- [项目结构说明](#项目结构说明)
+- [联系方式](#联系方式)
 
 ---
 
-# 项目特点
+## 项目介绍
 
-## 游戏 / 赛博风 UI
+**Digital Base V3** 是一个偏游戏控制台风格的个人网站，适合用来展示自己的项目、GitHub 仓库、喜欢的视频、常用网站导航、资源站、个人动态和留言内容。
 
-整体采用：
+它的核心结构是：
 
-- 深色电竞风
-- HUD 风格布局
-- 发光描边
-- 卡片式模块
-- 动态光效
+```txt
+前台展示页面 + 后台 CMS + Cloudflare Functions API + Cloudflare D1 数据库
+```
 
-灵感来源：
-
-- 游戏大厅
-- 战术终端
-- OBS 控制台
-- 深夜电竞房
+也就是说，你不需要每次改内容都去改代码。只要登录后台，就可以新增、编辑、隐藏、删除大部分内容。
 
 ---
 
-## Cloudflare 全家桶部署
+## 功能预览
 
-项目运行于：
+### 前台功能
 
-- Cloudflare Pages
-- Cloudflare Functions
-- Cloudflare D1
+| 模块 | 说明 |
+|---|---|
+| 首页 Hero | 展示个人网站主视觉、标题、简介、按钮 |
+| 视频传送门 | 支持视频入口卡片，YouTube 自动封面，悬停/手机可静音预览 |
+| 动态墙 | 发布文字、图片、视频类动态 |
+| STATUS PANEL | 自动统计动态、项目、资源、导航、留言数量 |
+| Recent Log | 最近动态轮播展示 |
+| 项目控制台 | 展示 GitHub 项目或个人作品 |
+| 资源站 | 放 Cloudflare、GitHub、ChatGPT 等资源入口 |
+| 我的导航 | 放常用网站、工具、游戏、素材站 |
+| 留言板 | 访客留言，后台可审核、隐藏、删除 |
+| 全站背景 | 支持后台配置大背景图 |
 
-特点：
+### 后台 CMS 功能
 
-- 免费部署
-- 全球 CDN
-- 自动 HTTPS
-- GitHub 自动更新
-- 无需传统服务器
-
----
-
-## 轻量 CMS
-
-本项目最大的目标之一：
-
-> 不使用传统后端服务器，也能拥有自己的 CMS 后台。
-
-整个系统基于：
-
-- Functions API
-- D1 数据库
-- 原生 HTML/CSS/JS
-
-实现轻量内容管理。
-
----
-
-# 当前已实现功能
-
-## 首页 Hero 系统
-
-支持：
-
-- 标题
-- 描述
-- 状态卡片
-- 按钮跳转
-- 背景图
-
-可直接后台修改。
+| 后台菜单 | 用途 |
+|---|---|
+| 首页设置 | 改首页标题、描述、按钮、状态文案、全站背景图 |
+| 轮播管理 | 管理首页 Hero 轮播图 |
+| 动态管理 | 新增/编辑/隐藏/删除动态 |
+| 留言管理 | 审核、隐藏、删除留言 |
+| 视频入口 | 管理视频传送门内容 |
+| 项目管理 | 管理项目展示 |
+| 资源站 | 管理资源入口 |
+| 我的导航 | 管理常用入口和书签 |
+| 朋友空间 | 预留功能，可后续扩展 |
+| 返回前台 | 回到网站首页 |
+| 退出登录 | 退出 CMS 后台 |
 
 ---
 
-## 动态墙系统
+## 使用前必须准备
 
-支持：
+在开始之前，一定先准备好这些东西，避免中途白忙活。
 
-- 文字动态
-- 图片动态
-- 标签分类
-- 时间排序
-- 置顶功能
+### 必备账号
 
-目前图片支持：
+| 项目 | 是否必须 | 用途 |
+|---|---:|---|
+| GitHub 账号 | 必须 | 存放项目代码 |
+| Cloudflare 账号 | 必须 | 部署网站、创建 D1 数据库 |
+| 邮箱 | 必须 | 注册、验证账号 |
+| 可用网络环境 | 推荐 | Cloudflare、GitHub 访问可能受网络影响 |
+| 信用卡 / 可验证支付方式 | 可能需要 | Cloudflare 账号风控或部分服务验证 |
 
-- jpg
-- png
-- webp
-- gif
+### 本地工具
 
-支持外链图片。
+建议电脑安装：
 
----
+| 工具 | 用途 |
+|---|---|
+| Git | 提交和上传项目 |
+| Node.js | 运行检查命令、脚本 |
+| VS Code / Trae / Cursor | 修改代码 |
+| 浏览器 | 测试网站和后台 |
 
-## 项目展示系统
-
-支持展示：
-
-- GitHub 项目
-- 网站项目
-- 视频项目
-- 工具项目
-
-功能：
-
-- 项目封面
-- 标签
-- 跳转链接
-- 排序
-- 显示隐藏
-
----
-
-## 视频入口系统
-
-用于整合：
-
-- 视频主页
-- 剪辑合集
-- 回放入口
-- 收藏频道
-
-避免视频内容分散。
-
----
-
-## 资源导航系统
-
-目前整理：
-
-- Cloudflare
-- GitHub
-- ChatGPT
-- Steam
-- AI 工具
-- 开发资源
-
-后续会继续扩展。
-
----
-
-# 技术栈
-
-## 前端
-
-- HTML5
-- CSS3
-- JavaScript
-
----
-
-## 云平台
-
-- Cloudflare Pages
-- Cloudflare Functions
-- Cloudflare D1
-
----
-
-## 数据结构
-
-- SQLite（D1）
-- REST API
-- JSON
-
----
-
-# 项目结构
+检查 Git：
 
 ```bash
-/functions
-  /api
-  /lib
+git --version
+```
 
-/admin
-/assets
-/data
+检查 Node.js：
+
+```bash
+node -v
 ```
 
 ---
 
-# API 示例
+## Cloudflare 账号与信用卡验证说明
 
-## 获取动态列表
+这个项目使用了 Cloudflare 的：
 
-```bash
-/api/posts
+```txt
+Cloudflare Pages
+Cloudflare Functions
+Cloudflare D1
 ```
+
+大多数情况下免费额度够用。但是新账号、风控账号、部分地区账号，Cloudflare 可能会要求你进行支付方式验证。
+
+### 可能遇到的情况
+
+你可能在 Cloudflare 使用过程中遇到：
+
+- 创建服务时提示验证身份
+- 绑定某些资源时要求添加付款方式
+- D1 / R2 / Workers 相关服务要求验证
+- 账号安全风控要求信用卡验证
+
+### 这一步是不是一定要做？
+
+不一定。有些账号可以直接创建 Pages 和 D1，有些账号会被要求验证信用卡或付款方式。
+
+### 需要注意
+
+Cloudflare 验证信用卡通常是为了确认账号真实性，不等于一定会收费。但你仍然要自己看清 Cloudflare 页面提示，确认是否有付费计划、是否开启了额外收费服务。
+
+### 建议
+
+在继续部署前，先确认：
+
+```txt
+Cloudflare 账号能正常登录
+Pages 能创建项目
+D1 能创建数据库
+账号没有验证拦截
+```
+
+如果卡在验证页面，先完成验证再继续。否则后面代码推上去了，也可能因为资源没有创建成功导致网站功能不完整。
 
 ---
 
-## 获取项目列表
+## 本地项目准备
 
-```bash
-/api/projects
-```
-
----
-
-## 获取站点设置
-
-```bash
-/api/site-settings
-```
-
----
-
-# 本地运行
-
-## 1. 克隆项目
+### 1. 下载或克隆项目
 
 ```bash
 git clone https://github.com/Nu-Exception/digital-base.git
-```
-
----
-
-## 2. 进入项目目录
-
-```bash
 cd digital-base
 ```
 
----
+如果你是下载 ZIP，解压后进入项目目录。
 
-## 3. 本地预览
-
-可以直接使用：
-
-```bash
-Live Server
-```
-
-或者：
-
-```bash
-npx wrangler pages dev .
-```
-
----
-
-# Cloudflare 部署教程
-
-## 1. Fork 或上传项目到 GitHub
-
-将项目上传到自己的 GitHub 仓库。
-
----
-
-## 2. 登录 Cloudflare
-
-进入：
+### 2. 确认目录里有这些文件
 
 ```txt
-Workers & Pages
+index.html
+script.js
+styles.css
+README.md
+schema.sql
+admin/
+functions/
+data/
+```
+
+如果没有这些文件，说明你进错文件夹了。
+
+### 3. 确认是不是 Git 仓库
+
+```bash
+git status
+```
+
+正常会显示：
+
+```txt
+On branch main
+```
+
+如果显示：
+
+```txt
+fatal: not a git repository
+```
+
+说明当前文件夹不是 Git 仓库。你需要进入真正的项目目录，例如：
+
+```bash
+cd digital-base-v3
+```
+
+或者重新初始化：
+
+```bash
+git init
+git branch -M main
 ```
 
 ---
 
-## 3. 创建 Pages 项目
+## GitHub 仓库准备
+
+### 1. 创建 GitHub 仓库
+
+进入 GitHub：
+
+```txt
+GitHub → New repository
+```
+
+建议仓库名：
+
+```txt
+digital-base
+```
 
 选择：
 
 ```txt
-Connect to Git
+Public
 ```
 
-连接 GitHub 仓库。
+创建后复制仓库地址，例如：
+
+```txt
+https://github.com/Nu-Exception/digital-base.git
+```
+
+### 2. 绑定远程仓库
+
+```bash
+git remote add origin https://github.com/Nu-Exception/digital-base.git
+```
+
+如果已经绑定过，但地址不对：
+
+```bash
+git remote set-url origin https://github.com/Nu-Exception/digital-base.git
+```
+
+查看远程地址：
+
+```bash
+git remote -v
+```
+
+### 3. 首次提交
+
+```bash
+git add .
+git commit -m "init digital base"
+git push -u origin main
+```
 
 ---
 
-## 4. 部署配置
+## Cloudflare Pages 部署
 
-构建配置：
+### 1. 进入 Cloudflare Dashboard
+
+打开 Cloudflare 后：
 
 ```txt
-Framework preset:
-None
+Workers & Pages → Create application → Pages → Connect to Git
+```
 
-Build command:
-（留空）
+### 2. 选择 GitHub 仓库
 
-Build output directory:
+选择你的仓库：
+
+```txt
+digital-base
+```
+
+### 3. 构建设置
+
+因为这个项目是原生 HTML/CSS/JS，不需要构建命令。
+
+推荐设置：
+
+| 项目 | 填写 |
+|---|---|
+| Framework preset | None |
+| Build command | 留空 |
+| Build output directory | `/` 或留空 |
+| Root directory | `/` |
+
+如果 Cloudflare 要求输出目录，可以填：
+
+```txt
 /
 ```
 
----
+### 4. 部署
 
-## 5. 创建 D1 数据库
-
-进入：
+点击：
 
 ```txt
-Storage & Databases -> D1
+Save and Deploy
 ```
 
-创建数据库。
+等待部署完成，成功后会得到类似：
 
-例如：
+```txt
+https://digital-base.pages.dev
+```
+
+---
+
+## 创建 D1 数据库
+
+后台动态、项目、留言等内容需要 D1 数据库保存。
+
+Cloudflare Dashboard：
+
+```txt
+Storage & databases → D1 SQL Database → Create
+```
+
+数据库名建议：
 
 ```txt
 digital-base-db
 ```
 
+创建完成后记住数据库名称。
+
 ---
 
-## 6. 绑定 D1
+## 绑定 D1 数据库
 
-进入：
+进入你的 Pages 项目：
 
 ```txt
-Pages -> Settings -> Bindings
+Workers & Pages → digital-base → Settings → Bindings
 ```
 
-添加：
+添加 D1 绑定：
+
+| 类型 | 变量名 | 数据库 |
+|---|---|---|
+| D1 database | `DB` | `digital-base-db` |
+
+注意变量名必须是：
 
 ```txt
-Type:
-D1 Database
-
-Variable name:
 DB
 ```
 
-绑定你的 D1 数据库。
+如果写成别的，Functions API 会读不到数据库。
+
+保存后重新部署一次。
 
 ---
 
-## 7. 初始化数据库
+## 初始化数据库表
 
-执行 SQL：
-
-```sql
-CREATE TABLE posts (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  title TEXT,
-  content TEXT
-);
-```
-
-或者导入项目提供的：
+项目根目录有：
 
 ```txt
 schema.sql
 ```
 
----
+这个文件用于创建表。
 
-## 8. 自动部署
+### 方法一：Cloudflare 控制台执行
 
-以后只需要：
+进入：
+
+```txt
+D1 → digital-base-db → Console
+```
+
+复制 `schema.sql` 内容进去执行。
+
+### 方法二：使用 Wrangler
+
+如果你安装了 Wrangler：
 
 ```bash
-git push
+npx wrangler d1 execute digital-base-db --file=./schema.sql
 ```
 
-Cloudflare Pages 会自动重新部署。
+执行成功后，数据库会创建这些表：
+
+```txt
+posts
+projects
+resources
+bookmarks
+messages
+video_links
+hero_slides
+site_settings
+friends
+```
+
+不同版本可能略有差异，以 `schema.sql` 为准。
 
 ---
 
-# 图片上传说明
+## 登录后台 CMS
 
-目前版本使用：
-
-```txt
-外链图片
-```
-
-推荐：
-
-- Postimages
-- ImgBB
-- GitHub Raw
-
-注意：
-
-必须填写：
+部署成功后，后台地址一般是：
 
 ```txt
-直接图片链接
+https://你的域名/admin/
 ```
 
 例如：
 
 ```txt
-https://i.postimg.cc/xxxxx/demo.jpg
+https://digital-base.pages.dev/admin/
 ```
 
-而不是网页链接。
+### 默认 Token / 密码
 
----
-
-# 后续开发计划
-
-正在慢慢加入：
-
-- 朋友空间
-- AI 实验区
-- 登录系统
-- 评论系统
-- 文件上传
-- 多主题模式
-- 更完整 CMS
-- 用户系统
-- Markdown 编辑器
-
----
-
-# 项目状态
+项目里后台验证通常会用一个 token。你需要检查：
 
 ```txt
-ACTIVE DEVELOPMENT
+functions/_lib/cms.js
+admin/admin.js
 ```
 
-项目仍在持续开发中。
+或项目文档中定义的 admin token。
 
-很多模块还会继续优化。
+如果后台提示未授权，说明：
 
----
-
-# 作者
-
-## CS
-
-正在学习：
-
-- 前端开发
-- Cloudflare Workers
-- UI 设计
-- AI 工具
-- 网站系统搭建
+- token 不对
+- API 没部署成功
+- Functions 没生效
+- D1 没绑定
 
 ---
 
-# 联系方式
+## 后台内容管理说明
 
-## GitHub
+### 首页设置
 
-https://github.com/Nu-Exception
-
----
-
-## Website
-
-https://digital-base.pages.dev
-
----
-
-## 微信
-
-Entropy4761
-
----
-
-## QQ
-
-476199719
-
----
-
-# License
-
-MIT
-
----
-
-## Projects API Rendering
-
-前台项目控制台优先读取 `/api/projects`，只显示公开项目，并按 `sort_order ASC`、`created_at DESC` 排序。API 失败或没有项目数据时，才回退 `data/site.json` 的默认项目。
-
----
-
-## CMS/API Dynamic Rendering
-
-前台栏目正在逐步从静态 `data/site.json` 迁移到 CMS/API 动态渲染：
-
-- 项目控制台读取 `/api/projects`
-- 资源站读取 `/api/resources`
-- 书签导航读取 `/api/bookmarks`
-- 视频入口读取 `/api/video-links`
-- 动态墙和 Recent Log 读取 `/api/posts`
-- 首页 Hero 读取 `/api/site-settings`
-
-视频入口封面字段支持图片直链和通用视频页面链接：图片直链会直接作为封面，YouTube 链接会自动转换为官方缩略图，B站、短视频、Vimeo 或普通网页链接会显示暗色游戏风视频占位封面；如果跳转链接为空但封面字段填写的是视频链接，前台“打开”按钮会使用该封面链接作为跳转目标。
-
-全站支持背景图能力：在 `styles.css` 的 `:root` 中修改 `--site-bg-image`，例如 `--site-bg-image: url("https://example.com/bg.webp");`。背景会使用 `cover / center / fixed` 显示，并叠加暗色遮罩；保持 `none` 时继续使用原来的暗色渐变背景。
-
-后台“首页设置”的背景图链接现在控制全站底层背景，也就是页面左右两侧和内容底层背景；它不会再替换 Hero 横幅或轮播图。Hero 图片继续由轮播管理 `/api/hero-slides` 或 `data/site.json` 的 `heroSlides` 控制。
-
-视频传送门已放大为更突出的首页模块：桌面端按 3 列展示大卡片，移动端自动收缩；视频区右上角“进入完整项目”按钮已移除。YouTube 视频链接支持鼠标悬停时尝试静音自动预览，移出后恢复封面；B站和其它视频链接保留封面缩放、播放图标高亮和暗色光效。
-
-视频入口播放体验继续优化：桌面端 hover 视频卡片、移动端滚动到卡片可见 60% 以上时，会进入 `.is-playing` 播放态并隐藏标题、说明、标签和按钮；YouTube 链接会尝试创建静音 autoplay iframe，离开卡片或离开视口后销毁 iframe。同一时间最多播放一个卡片，非 YouTube 链接只做播放态视觉效果。页面首次打开如果没有 hash，会停留在顶部；带 `#portal`、`#projects` 等 hash 时仍允许跳转到对应区域。
-
-`data/site.json` 现在只作为 API 失败或数据库暂无内容时的 fallback。
-
-我的导航 / 书签收藏区已经改为完全由后台 CMS 管理，只读取 `/api/bookmarks`。如果数据库暂无书签，前台显示“暂无导航数据”，不会再回退到 Steam、Epic、ChatGPT 等默认静态卡片。
-
-留言板、状态面板、Recent Log 和 Fast Links 也已经去除默认假数据：
-
-- 留言板只显示 `/api/messages` 返回的真实留言；无数据时显示“暂无留言”
-- 状态面板读取 CMS/site settings 或 `data/site.json` 的状态配置；未配置时显示简洁在线状态
-- Recent Log 读取 `/api/posts`；无数据时显示“暂无动态”
-- Fast Links 优先从 `/api/bookmarks` 或 `/api/resources` 取前 4 条；无数据时显示“暂无快捷入口”
-
-首页状态区的 Recent Log / 最近动态已改为固定高度轮播：每次只展示 1 条动态，支持 4 秒自动切换、左右按钮和圆点指示；标题和正文会自动截断，避免撑高首页模块。动态墙仍保留完整内容展示，用于查看全部动态。
-
-首页 Status Panel 已改为游戏基地 HUD 风格，固定展示基地在线、ONLINE 呼吸灯、最后更新时间、动态/项目/留言数量和施工状态；卡片尺寸保持不变，不影响 Recent Log 和 Fast Links。
-
-首页 Status Panel 现在是动态统计 HUD：数量来自 `/api/posts`、`/api/projects`、`/api/resources`、`/api/bookmarks`、`/api/messages`，分别显示动态、项目、资源、导航、留言总数；新增或删除内容后刷新页面会自动重新统计，接口异常时对应数字显示 0。
-
-Status Panel 视觉已升级为赛博 HUD 数据芯片样式：动态统计以小型 chip 展示，底部包含 `SYSTEM STABLE` 运行状态条，保持原卡片长宽高，不影响 Recent Log 和 Fast Links。
-
-前台内容整体优先读取 CMS/API，无数据时显示空状态提示，避免继续展示默认占位假数据。
-
-留言板公开接口 `/api/messages` 会兼容 `is_public`、`visible`、`is_visible` 显示字段；后台留言管理点“显示”后，前台刷新或发布留言成功后会重新读取接口。可用 `/api/messages?debug=1` 检查表字段、总数和最近 5 条留言。
-
-`/api/messages` 正常模式已修复公开留言查询：会读取 Cloudflare D1 的 `result.results`，并兼容 `is_public = 1`、`is_public = '1'`、`is_public = true`、`is_public IS NULL`。如果 `/api/messages?debug=1` 能看到公开留言，正常 `/api/messages` 也应该返回到 `messages` 数组中。
-
-留言接口正常模式现在会先读取 `messages` 表最近 50 条原始数据，再在 JS 中过滤公开留言，避免 D1/SQLite 在 `WHERE is_public = 1` 这类条件上因为字段类型差异返回空数组。`/api/messages?debug=1` 会额外返回 `all_rows`，方便对照正式接口是否漏数据。
-
-留言接口正常模式进一步简化为直接返回 `messages` 表最近 50 条已保存留言，不再在接口层过滤 `is_public`；隐藏和删除由后台留言管理控制，前台只负责渲染 `/api/messages` 返回的 `messages` 数组。
-
-前台留言板已兼容 D1 常用字段：昵称读取 `nickname` / `name` / `author`，内容读取 `content` / `message` / `body`，时间读取 `created_at` / `createdAt`。如果接口返回空数组，右侧留言列表只显示“暂无留言”，不再展示阿杰、老王、站长等默认假留言。
-
-全站时间显示已统一为中国时区 `Asia/Shanghai` / UTC+8。前台动态墙、Recent Log、留言板，以及后台 CMS 中的 `created_at` / `updated_at` 都通过统一的 `formatCNTime()` 格式化；D1 返回的 `YYYY-MM-DD HH:mm:ss` 会按 UTC 解析后转换为中国本地时间。
-
-视频传送门已改为 CMS/API 驱动，只读取 `/api/video-links`。如果后台“视频入口”暂无数据，前台显示“暂无视频入口”，不会再展示默认写死的视频卡片；只有在后台新增并显示视频入口后，才会出现在前台。
-
-朋友空间是预留模块，当前前台暂时隐藏；后续可扩展为友链、开黑状态、留言互动等功能。后台朋友空间菜单会继续保留。
-
-Base Lab / 后续扩展模块当前也作为预留模块隐藏，不在前台展示静态说明。前台剩余默认假数据已经清理，CMS/API 没有数据时统一显示空状态提示。
-
-测试地址：
+路径：
 
 ```txt
-/api/projects
-/api/resources
-/api/bookmarks
-/api/video-links
+后台 → 首页设置
+```
+
+可修改：
+
+| 字段 | 作用 |
+|---|---|
+| Hero Kicker | 首页小标题 |
+| Hero 标题 | 首页大标题 |
+| Hero 描述 | 首页介绍文字 |
+| 主按钮文字 | 第一个按钮文案 |
+| 主按钮链接 | 第一个按钮跳转 |
+| 副按钮文字 | 第二个按钮文案 |
+| 副按钮链接 | 第二个按钮跳转 |
+| 状态标题 | 状态卡标题 |
+| 状态说明 | 状态卡说明 |
+| 背景图链接 | 全站底层背景图 |
+
+注意：**背景图链接控制的是整个网站底层背景，不是 Hero 轮播图。**
+
+### 动态管理
+
+路径：
+
+```txt
+后台 → 动态管理
+```
+
+可以发布文字、图片、视频类动态。图片链接一行一个。
+
+### 视频入口
+
+路径：
+
+```txt
+后台 → 视频入口
+```
+
+字段说明：
+
+| 字段 | 说明 |
+|---|---|
+| 标题 | 视频卡片标题 |
+| 说明 | 视频简介 |
+| 封面图 | 可填图片直链，也可填视频链接 |
+| 跳转链接 | 点击打开跳转的链接 |
+| 标签 | 逗号分隔 |
+| 排序 | 数字越小越靠前 |
+| 显示 | 是否在前台显示 |
+
+### 项目管理
+
+路径：
+
+```txt
+后台 → 项目管理
+```
+
+适合填写 GitHub 项目、自己做的网站、工具软件、学习项目、视频剪辑展示项目。
+
+### 资源站
+
+路径：
+
+```txt
+后台 → 资源站
+```
+
+适合放 Cloudflare、GitHub、ChatGPT、文档站、开发工具、图片素材站。
+
+### 我的导航
+
+路径：
+
+```txt
+后台 → 我的导航
+```
+
+这里的数据会影响首页：
+
+```txt
+FAST LINKS / 常用入口
+```
+
+也会影响：
+
+```txt
+我的导航页 / 书签收藏区
+```
+
+### 留言管理
+
+路径：
+
+```txt
+后台 → 留言管理
+```
+
+访客留言后，后台可以显示、隐藏、删除。如果前台没有显示留言，先看后台是否处于隐藏或待审核状态。
+
+---
+
+## 视频入口封面规则
+
+视频入口的「封面图」字段支持两种写法。
+
+### 1. 图片直链
+
+可以填：
+
+```txt
+https://example.com/image.jpg
+https://example.com/image.png
+https://example.com/image.webp
+```
+
+前台会直接显示图片。
+
+### 2. 视频链接
+
+YouTube 链接会自动识别并生成封面：
+
+```txt
+https://www.youtube.com/watch?v=xxxx
+https://youtu.be/xxxx
+https://youtube.com/shorts/xxxx
+```
+
+系统会自动转换成 YouTube 缩略图。
+
+### 3. B站或其他视频链接
+
+B站、抖音、小红书等链接不一定能直接拿到封面，因为平台可能有跨域、反爬或权限限制。
+
+这种情况下：
+
+- 不会报错
+- 会显示统一视频占位封面
+- 点击打开仍然跳转原链接
+
+---
+
+## 全站背景图设置
+
+进入：
+
+```txt
+后台 → 首页设置 → 背景图链接
+```
+
+填入图片直链，例如：
+
+```txt
+https://example.com/background.jpg
+```
+
+建议图片为横向大图、暗色、赛博风、游戏桌面、深夜工作台、复古电脑、雨夜城市。
+
+不建议使用太亮的图，否则文字会看不清。
+
+### 图片链接必须是直链
+
+正确：
+
+```txt
+https://example.com/bg.jpg
+```
+
+错误：
+
+```txt
+Pinterest 页面链接
+B站页面链接
+网页文章链接
+```
+
+---
+
+## 留言板审核与显示
+
+留言板逻辑可能根据版本不同有两种模式。
+
+### 模式一：留言后直接显示
+
+访客发布留言后，前台立即显示。
+
+### 模式二：后台审核后显示
+
+访客发布留言后，后台可见，但前台不显示。你需要进入：
+
+```txt
+后台 → 留言管理
+```
+
+点击：
+
+```txt
+显示
+```
+
+如果 `/api/messages` 返回空，但后台有留言，检查 `is_public` 或后台显示状态。
+
+---
+
+## 常用测试地址
+
+部署后，可以用这些地址检查接口是否正常。
+
+```txt
+https://你的域名/api/posts
+https://你的域名/api/projects
+https://你的域名/api/resources
+https://你的域名/api/bookmarks
+https://你的域名/api/messages
+https://你的域名/api/messages?debug=1
+```
+
+正常接口会返回类似：
+
+```json
+{
+  "posts": []
+}
+```
+
+或者：
+
+```json
+{
+  "messages": []
+}
+```
+
+如果 debug 有数据，但正常接口空，说明过滤逻辑或显示状态有问题。
+
+---
+
+## 常见问题与解决方法
+
+### 1. git push 报错：not a git repository
+
+报错：
+
+```txt
+fatal: not a git repository
+```
+
+原因：当前目录不是 Git 仓库。
+
+解决：
+
+```bash
+cd 你的项目目录
+git status
+```
+
+如果还是不行：
+
+```bash
+git init
+git branch -M main
+```
+
+### 2. Cloudflare 部署成功，但 API 返回空
+
+先打开：
+
+```txt
 /api/posts
+/api/projects
 /api/messages
 ```
 
-维护规则：
+如果都返回空，检查：
 
-- 后续每次新增功能、API、页面或后台模块，都要同步更新 README.md
-- README 不要随便重写，只做增量维护
+1. D1 是否创建
+2. Pages 是否绑定了 D1
+3. 绑定变量名是否是 `DB`
+4. 是否重新部署
+5. 数据库表是否初始化
+6. 后台内容是否勾选显示
+
+### 3. 后台能看到数据，前台不显示
+
+检查：
+
+```txt
+是否点了显示
+is_public 是否为 1
+前台是否缓存
+是否 Ctrl + F5 强制刷新
+/api 对应接口是否返回数据
+```
+
+### 4. 留言接口 debug 有数据，但正常接口没数据
+
+打开：
+
+```txt
+/api/messages?debug=1
+```
+
+如果 debug 里 `all_rows` 有数据，但 `/api/messages` 空，说明 messages 接口过滤逻辑有问题。
+
+解决方向：
+
+```txt
+让 /api/messages 直接返回最近 50 条 messages 表数据
+```
+
+### 5. 时间显示不对
+
+如果显示的是 UTC 时间，不是中国时间，需要统一使用：
+
+```txt
+Asia/Shanghai
+```
+
+前端格式化应使用：
+
+```js
+new Date(dateString).toLocaleString("zh-CN", {
+  timeZone: "Asia/Shanghai"
+});
+```
+
+数据库可以继续存 UTC，显示层转换即可。
+
+### 6. 视频封面不显示
+
+检查封面图字段。
+
+正确图片直链：
+
+```txt
+https://xxx.com/xxx.jpg
+```
+
+YouTube 视频链接：
+
+```txt
+https://www.youtube.com/watch?v=xxxx
+```
+
+如果是 B站、抖音、小红书，可能无法自动拿封面，会显示占位图，这是正常现象。
+
+### 7. 网站打开自动跳到底部
+
+检查是否存在：
+
+```txt
+scrollIntoView
+autofocus
+focus()
+location.hash
+window.scrollTo
+```
+
+首次打开网站时，如果没有 hash，应该保持顶部：
+
+```js
+window.scrollTo(0, 0);
+```
+
+### 8. Cloudflare Pages 修改后没生效
+
+可能是部署还没完成、浏览器缓存、Cloudflare 缓存、推送的不是 main 分支。
+
+解决：
+
+```txt
+Cloudflare Pages → Deployments
+```
+
+确认最新 commit 变绿。然后浏览器：
+
+```txt
+Ctrl + F5
+```
+
+### 9. GitHub API 限流
+
+如果脚本读取 GitHub 项目时报：
+
+```txt
+API rate limit exceeded
+```
+
+解决：
+
+- 等一小时
+- 或使用 GitHub Token
+- 或手动在后台项目管理添加项目
+
+### 10. Cloudflare 绑定里没有 R2
+
+当前版本主要使用：
+
+```txt
+D1 + 外链图片
+```
+
+如果你没有做站内图片上传，R2 不是必须。图片可以先用外部图床、GitHub 图片、Cloudinary、Postimages 等方式。
+
+以后如果要做真正的后台上传图片，再接入 R2。
+
+---
+
+## 更新项目的推荐流程
+
+每次修改项目后，建议使用命令行提交。
+
+```bash
+git status
+git add .
+git commit -m "update site"
+git push
+```
+
+Cloudflare Pages 会自动部署。
+
+部署后进入：
+
+```txt
+Cloudflare Pages → Deployments
+```
+
+确认最新提交变成绿色。
+
+---
+
+## 推荐给 Codex 的更新习惯
+
+以后让 AI 或 Codex 修改项目时，建议每次都加上：
+
+```txt
+同步更新 README.md，说明本次改动内容、使用方法和注意事项。
+```
+
+这样 README 不会落后于项目功能。
+
+---
+
+## 项目结构说明
+
+```txt
+digital-base/
+├── index.html
+├── script.js
+├── styles.css
+├── README.md
+├── schema.sql
+├── data/
+│   └── site.json
+├── admin/
+│   ├── index.html
+│   ├── admin.js
+│   └── admin.css
+└── functions/
+    ├── _lib/
+    │   ├── cms.js
+    │   └── resource.js
+    └── api/
+        ├── posts.js
+        ├── projects.js
+        ├── resources.js
+        ├── bookmarks.js
+        ├── messages.js
+        ├── video-links.js
+        ├── hero-slides.js
+        └── site-settings.js
+```
+
+### 重要文件说明
+
+| 文件 | 作用 |
+|---|---|
+| `index.html` | 前台页面结构 |
+| `script.js` | 前台动态渲染和交互逻辑 |
+| `styles.css` | 前台样式 |
+| `admin/index.html` | 后台页面结构 |
+| `admin/admin.js` | 后台管理逻辑 |
+| `admin/admin.css` | 后台样式 |
+| `functions/api/*.js` | Cloudflare Functions API |
+| `schema.sql` | D1 数据库表结构 |
+| `README.md` | 项目说明文档 |
+
+---
+
+## 适合继续扩展的功能
+
+以后可以继续加：
+
+- 图片上传到 R2
+- Markdown 文章系统
+- 留言回复
+- 评论系统
+- 访客统计
+- Steam 状态展示
+- GitHub 提交记录
+- 视频分类页
+- 搜索功能
+- 标签归档
+- 手机端专属优化
+- 登录权限系统
+- 主题切换
+- 音乐播放器
+
+---
+
+## 联系方式
+
+作者：**CS**
+
+GitHub：
+
+```txt
+https://github.com/Nu-Exception
+```
+
+项目地址：
+
+```txt
+https://github.com/Nu-Exception/digital-base
+```
+
+邮箱：
+
+```txt
+gameforum.clubtime@gmail.com
+```
+
+个人网站：
+
+```txt
+https://digital-base.pages.dev
+```
+
+---
+
+## 最后说明
+
+这个项目不是一次性写完就结束的模板，而是一个可以不断扩展的个人数字基地。
+
+你可以把它当成：
+
+```txt
+个人主页
+项目展示台
+游戏内容入口
+学习记录站
+工具导航页
+数字生活档案馆
+```
+
+先让它跑起来，再慢慢填内容、改样式、加功能。
+
+真正重要的是：
+
+```txt
+先部署成功
+再接好数据库
+再确认 API 有数据
+最后再慢慢美化
+```
+
+不要一开始就追求完美。能跑起来，才有继续优化的价值。
