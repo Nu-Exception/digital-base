@@ -195,10 +195,31 @@ function normalizeArray(value) {
   }
 }
 
+function parseCNTimeSource(value) {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  const text = String(value).trim();
+  const hasTimezone = /(?:z|[+-]\d{2}:?\d{2})$/i.test(text);
+  const sqliteUtc = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?::\d{2})?(?:\.\d+)?$/.test(text);
+  return new Date(sqliteUtc && !hasTimezone ? `${text.replace(" ", "T")}Z` : text);
+}
+
+function formatCNTime(dateString) {
+  const date = parseCNTimeSource(dateString);
+  if (!date || Number.isNaN(date.getTime())) return dateString || "";
+  return date.toLocaleString("zh-CN", {
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "numeric",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit"
+  });
+}
+
 function formatDate(value) {
-  if (!value) return "";
-  const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString("zh-CN");
+  return formatCNTime(value);
 }
 
 function renderNav() {
@@ -347,6 +368,13 @@ function itemBody(item) {
   return item.description || item.body || item.status || item.content || item.url || "";
 }
 
+function timePills(item) {
+  return `
+    ${item.created_at ? `<span class="pill">创建 ${formatDate(item.created_at)}</span>` : ""}
+    ${item.updated_at ? `<span class="pill">更新 ${formatDate(item.updated_at)}</span>` : ""}
+  `;
+}
+
 function renderListItem(item) {
   const tags = normalizeArray(item.tags);
   return `
@@ -363,7 +391,7 @@ function renderListItem(item) {
         ${item.type ? `<span class="pill">${escapeHtml(item.type)}</span>` : ""}
         ${item.category ? `<span class="pill">${escapeHtml(item.category)}</span>` : ""}
         ${tags.map((tag) => `<span class="pill">${escapeHtml(tag)}</span>`).join("")}
-        ${item.created_at ? `<span class="pill">${formatDate(item.created_at)}</span>` : ""}
+        ${timePills(item)}
       </div>
     </article>
   `;
@@ -379,7 +407,7 @@ function renderMessageItem(item) {
         </div>
         <span class="pill">${item.is_public === 0 ? "隐藏" : "显示"}</span>
       </div>
-      <div class="pill-row">${item.created_at ? `<span class="pill">${formatDate(item.created_at)}</span>` : ""}</div>
+      <div class="pill-row">${timePills(item)}</div>
     </article>
   `;
 }
@@ -460,7 +488,7 @@ async function refreshResourceList(key) {
       <div class="pill-row">
         ${item.sort_order !== undefined ? `<span class="pill">排序 ${item.sort_order}</span>` : ""}
         ${item.is_pinned ? '<span class="pill">置顶</span>' : ""}
-        ${item.created_at ? `<span class="pill">${formatDate(item.created_at)}</span>` : ""}
+        ${timePills(item)}
       </div>
       <div class="action-row">
         <button class="tiny-btn" type="button" data-action="edit" data-id="${item.id}">编辑</button>
@@ -523,7 +551,7 @@ async function renderMessagesManager() {
         </div>
         <span class="pill">${item.is_public === 0 ? "隐藏" : "显示"}</span>
       </div>
-      <div class="pill-row">${item.created_at ? `<span class="pill">${formatDate(item.created_at)}</span>` : ""}</div>
+      <div class="pill-row">${timePills(item)}</div>
       <div class="action-row">
         <button class="tiny-btn" type="button" data-action="toggle" data-id="${item.id}" data-value="${item.is_public === 0 ? 1 : 0}">${item.is_public === 0 ? "显示" : "隐藏"}</button>
         <button class="tiny-btn danger-btn" type="button" data-action="delete" data-id="${item.id}">删除</button>

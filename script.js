@@ -96,7 +96,7 @@ function sortCmsItems(items = []) {
 function compareCmsItems(a, b) {
   const orderDiff = Number(a.sort_order ?? 0) - Number(b.sort_order ?? 0);
   if (orderDiff) return orderDiff;
-  return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+  return getCNTimeValue(b.created_at) - getCNTimeValue(a.created_at);
 }
 
 function normalizeArray(value) {
@@ -113,17 +113,36 @@ function normalizeArray(value) {
   }
 }
 
-function formatDate(value) {
-  if (!value) return "";
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
+function parseCNTimeSource(value) {
+  if (!value) return null;
+  if (value instanceof Date) return value;
+  const text = String(value).trim();
+  const hasTimezone = /(?:z|[+-]\d{2}:?\d{2})$/i.test(text);
+  const sqliteUtc = /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}(?::\d{2})?(?:\.\d+)?$/.test(text);
+  return new Date(sqliteUtc && !hasTimezone ? `${text.replace(" ", "T")}Z` : text);
+}
+
+function getCNTimeValue(value) {
+  const date = parseCNTimeSource(value);
+  return date && !Number.isNaN(date.getTime()) ? date.getTime() : 0;
+}
+
+function formatCNTime(dateString) {
+  const date = parseCNTimeSource(dateString);
+  if (!date || Number.isNaN(date.getTime())) return dateString || "";
   return date.toLocaleString("zh-CN", {
+    timeZone: "Asia/Shanghai",
     year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
+    month: "numeric",
+    day: "numeric",
     hour: "2-digit",
-    minute: "2-digit"
+    minute: "2-digit",
+    second: "2-digit"
   });
+}
+
+function formatDate(value) {
+  return formatCNTime(value);
 }
 
 function applySiteSettings(data, settings = {}) {
@@ -231,8 +250,7 @@ function renderStatus() {
 }
 
 function formatSyncTime(date = new Date()) {
-  const pad = (value) => String(value).padStart(2, "0");
-  return `${date.getFullYear()}/${pad(date.getMonth() + 1)}/${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  return formatCNTime(date);
 }
 
 function renderStatusStats(stats = {}) {
@@ -360,7 +378,7 @@ async function loadRecentLog(data) {
       .sort((a, b) => {
         const pinnedDiff = Number(b.is_pinned || 0) - Number(a.is_pinned || 0);
         if (pinnedDiff) return pinnedDiff;
-        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+        return getCNTimeValue(b.created_at) - getCNTimeValue(a.created_at);
       });
     renderRecentLog(posts);
   } catch (error) {
@@ -911,7 +929,7 @@ async function loadPosts(data) {
       .sort((a, b) => {
         const pinnedDiff = Number(b.is_pinned || 0) - Number(a.is_pinned || 0);
         if (pinnedDiff) return pinnedDiff;
-        return new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime();
+        return getCNTimeValue(b.created_at) - getCNTimeValue(a.created_at);
       });
     renderFeed(visiblePosts);
   } catch (error) {
