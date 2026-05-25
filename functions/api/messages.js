@@ -6,8 +6,7 @@ import {
   methodNotAllowed,
   readJson,
   requireAdmin,
-  requireDb,
-  toInt
+  requireDb
 } from "../_lib/cms.js";
 
 async function getColumns(env) {
@@ -27,12 +26,6 @@ function getMessageSelect(columns) {
   return fields.length ? fields.join(", ") : "*";
 }
 
-function isPublicMessage(row, hasPublicField) {
-  if (!hasPublicField) return true;
-  const value = row.is_public;
-  return value === 1 || value === "1" || value === true || value == 1 || value === null || value === undefined || value === "";
-}
-
 export async function onRequestGet({ request, env }) {
   try {
     const dbError = requireDb(env);
@@ -45,7 +38,6 @@ export async function onRequestGet({ request, env }) {
       const authError = requireAdmin(request, env);
       if (authError) return authError;
     }
-    const limit = Math.min(toInt(url.searchParams.get("limit"), 50), admin ? 200 : 50);
     const table = await env.DB.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'messages'").first();
     const table_exists = Boolean(table);
     if (!table_exists) return debug ? json({ table_exists, columns: [], total: 0, recent: [] }) : json({ messages: [] });
@@ -66,10 +58,13 @@ export async function onRequestGet({ request, env }) {
       });
     }
 
-    const result = await env.DB.prepare(`SELECT ${select} FROM messages ORDER BY ${order} LIMIT ?`).bind(limit).all();
-    const rows = result.results || [];
-    const messages = admin ? rows : rows.filter((row) => isPublicMessage(row, columns.includes("is_public")));
-    return json({ messages });
+    const result = await env.DB.prepare(`
+      SELECT id, nickname, content, created_at, is_public
+      FROM messages
+      ORDER BY created_at DESC
+      LIMIT 50
+    `).all();
+    return json({ messages: result.results || [] });
   } catch (error) {
     return json({ error: error.message || String(error) }, 500);
   }

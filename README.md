@@ -542,6 +542,8 @@ MIT
 
 留言接口正常模式现在会先读取 `messages` 表最近 50 条原始数据，再在 JS 中过滤公开留言，避免 D1/SQLite 在 `WHERE is_public = 1` 这类条件上因为字段类型差异返回空数组。`/api/messages?debug=1` 会额外返回 `all_rows`，方便对照正式接口是否漏数据。
 
+留言接口正常模式进一步简化为直接返回 `messages` 表最近 50 条已保存留言，不再在接口层过滤 `is_public`；隐藏和删除由后台留言管理控制，前台只负责渲染 `/api/messages` 返回的 `messages` 数组。
+
 前台留言板已兼容 D1 常用字段：昵称读取 `nickname` / `name` / `author`，内容读取 `content` / `message` / `body`，时间读取 `created_at` / `createdAt`。如果接口返回空数组，右侧留言列表只显示“暂无留言”，不再展示阿杰、老王、站长等默认假留言。
 
 视频传送门已改为 CMS/API 驱动，只读取 `/api/video-links`。如果后台“视频入口”暂无数据，前台显示“暂无视频入口”，不会再展示默认写死的视频卡片；只有在后台新增并显示视频入口后，才会出现在前台。
