@@ -538,6 +538,8 @@ MIT
 
 留言板公开接口 `/api/messages` 会兼容 `is_public`、`visible`、`is_visible` 显示字段；后台留言管理点“显示”后，前台刷新或发布留言成功后会重新读取接口。可用 `/api/messages?debug=1` 检查表字段、总数和最近 5 条留言。
 
+`/api/messages` 正常模式已修复公开留言查询：会读取 Cloudflare D1 的 `result.results`，并兼容 `is_public = 1`、`is_public = '1'`、`is_public = true`、`is_public IS NULL`。如果 `/api/messages?debug=1` 能看到公开留言，正常 `/api/messages` 也应该返回到 `messages` 数组中。
+
 前台留言板已兼容 D1 常用字段：昵称读取 `nickname` / `name` / `author`，内容读取 `content` / `message` / `body`，时间读取 `created_at` / `createdAt`。如果接口返回空数组，右侧留言列表只显示“暂无留言”，不再展示阿杰、老王、站长等默认假留言。
 
 视频传送门已改为 CMS/API 驱动，只读取 `/api/video-links`。如果后台“视频入口”暂无数据，前台显示“暂无视频入口”，不会再展示默认写死的视频卡片；只有在后台新增并显示视频入口后，才会出现在前台。

@@ -18,9 +18,10 @@ async function getColumns(env) {
 function buildWhere(columns) {
   const fields = ["is_public", "visible", "is_visible"].filter((field) => columns.includes(field));
   if (!fields.length) return "";
-  const anyVisible = fields.map((field) => `${field} = 1`).join(" OR ");
-  const allUnset = fields.map((field) => `${field} IS NULL`).join(" AND ");
-  return `WHERE (${anyVisible} OR (${allUnset}))`;
+  const visibleChecks = fields
+    .map((field) => `(${field} = 1 OR ${field} = '1' OR ${field} = true OR ${field} IS NULL)`)
+    .join(" OR ");
+  return `WHERE (${visibleChecks})`;
 }
 
 function buildOrder(columns) {
@@ -42,7 +43,7 @@ export async function onRequestGet({ request, env }) {
       const authError = requireAdmin(request, env);
       if (authError) return authError;
     }
-    const limit = Math.min(toInt(url.searchParams.get("limit"), 12), admin ? 200 : 30);
+    const limit = Math.min(toInt(url.searchParams.get("limit"), 50), admin ? 200 : 50);
     const table = await env.DB.prepare("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'messages'").first();
     const table_exists = Boolean(table);
     if (!table_exists) return debug ? json({ table_exists, columns: [], total: 0, recent: [] }) : json({ messages: [] });
