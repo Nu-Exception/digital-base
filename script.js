@@ -6,6 +6,8 @@ let carouselTimer = null;
 let recentLogItems = [];
 let recentLogIndex = 0;
 let recentLogTimer = null;
+let activeVideoCard = null;
+let videoViewportObserver = null;
 const BOOKMARK_CATEGORIES = ["AI工具", "游戏", "开发", "视频", "素材", "常用"];
 const STATUS_STATS = [
   { key: "posts", label: "动态", url: "/api/posts" },
@@ -14,6 +16,17 @@ const STATUS_STATS = [
   { key: "bookmarks", label: "导航", url: "/api/bookmarks" },
   { key: "messages", label: "留言", url: "/api/messages" }
 ];
+
+if ("scrollRestoration" in history) {
+  history.scrollRestoration = "manual";
+}
+
+function resetInitialScrollPosition() {
+  if (!window.location.hash) window.scrollTo(0, 0);
+}
+
+resetInitialScrollPosition();
+window.addEventListener("load", resetInitialScrollPosition);
 
 async function getData() {
   const res = await fetch("./data/site.json", { cache: "no-store" });
@@ -620,27 +633,64 @@ function getYouTubeEmbedUrl(id) {
   return `https://www.youtube.com/embed/${attr(id)}?autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1`;
 }
 
+function startVideoPreview(card) {
+  if (!card) return;
+  if (activeVideoCard && activeVideoCard !== card) stopVideoPreview(activeVideoCard);
+  activeVideoCard = card;
+  card.classList.add("is-playing");
+
+  if (!card.dataset.youtubeId || card.querySelector(".video-preview-frame")) return;
+  const iframe = document.createElement("iframe");
+  iframe.className = "video-preview-frame";
+  iframe.src = getYouTubeEmbedUrl(card.dataset.youtubeId);
+  iframe.title = card.dataset.title || "YouTube preview";
+  iframe.loading = "lazy";
+  iframe.allow = "autoplay; encrypted-media; picture-in-picture";
+  iframe.setAttribute("allowfullscreen", "");
+  card.prepend(iframe);
+}
+
+function stopVideoPreview(card) {
+  if (!card) return;
+  card.querySelector(".video-preview-frame")?.remove();
+  card.classList.remove("is-playing");
+  if (activeVideoCard === card) activeVideoCard = null;
+}
+
 function bindVideoPreviewCards() {
-  document.querySelectorAll(".video-card[data-youtube-id]").forEach((card) => {
+  if (videoViewportObserver) videoViewportObserver.disconnect();
+  stopVideoPreview(activeVideoCard);
+
+  const cards = [...document.querySelectorAll(".video-card")];
+  const useViewportPlayback = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+  cards.forEach((card) => {
     card.addEventListener("mouseenter", () => {
-      if (card.querySelector(".video-preview-frame")) return;
-      const id = card.dataset.youtubeId;
-      if (!id) return;
-      const iframe = document.createElement("iframe");
-      iframe.className = "video-preview-frame";
-      iframe.src = getYouTubeEmbedUrl(id);
-      iframe.title = card.dataset.title || "YouTube preview";
-      iframe.loading = "lazy";
-      iframe.allow = "autoplay; encrypted-media; picture-in-picture";
-      iframe.setAttribute("allowfullscreen", "");
-      card.prepend(iframe);
-      card.classList.add("previewing");
+      if (!useViewportPlayback) startVideoPreview(card);
     });
     card.addEventListener("mouseleave", () => {
-      card.querySelector(".video-preview-frame")?.remove();
-      card.classList.remove("previewing");
+      if (!useViewportPlayback) stopVideoPreview(card);
     });
   });
+
+  if (!useViewportPlayback || !cards.length) return;
+  videoViewportObserver = new IntersectionObserver((entries) => {
+    const visible = entries
+      .filter((entry) => entry.isIntersecting && entry.intersectionRatio >= .6)
+      .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+
+    if (visible) {
+      startVideoPreview(visible.target);
+      return;
+    }
+
+    entries.forEach((entry) => {
+      if (entry.target === activeVideoCard && (!entry.isIntersecting || entry.intersectionRatio < .6)) {
+        stopVideoPreview(entry.target);
+      }
+    });
+  }, { threshold: [.6], rootMargin: "-18% 0px -18% 0px" });
+
+  cards.forEach((card) => videoViewportObserver.observe(card));
 }
 
 function renderVideoList(videos) {

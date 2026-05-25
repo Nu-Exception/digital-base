@@ -551,6 +551,7 @@ footer {
   inset: 0;
   background: linear-gradient(180deg, rgba(4, 6, 10, .08), rgba(4, 6, 10, .9) 78%);
   pointer-events: none;
+  transition: opacity .2s ease;
 }
 
 .video-cover {
@@ -669,8 +670,12 @@ footer {
   transform: scale(1.035);
 }
 
-.video-card.previewing .video-cover,
-.video-card.previewing .video-cover-placeholder {
+.video-card.is-playing::after {
+  opacity: 0;
+}
+
+.video-card[data-youtube-id].is-playing .video-cover,
+.video-card[data-youtube-id].is-playing .video-cover-placeholder {
   opacity: 0;
 }
 
@@ -679,12 +684,24 @@ footer {
   box-shadow: 0 0 26px rgba(250, 204, 21, .34);
 }
 
+.video-card.is-playing .video-cover-play {
+  border-color: rgba(250, 204, 21, .82);
+  box-shadow: 0 0 34px rgba(250, 204, 21, .42);
+}
+
 .video-card-content {
   position: relative;
   z-index: 2;
   align-self: flex-end;
   width: 100%;
   padding: 16px;
+  transition: opacity .2s ease, transform .2s ease;
+}
+
+.video-card.is-playing .video-card-content {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(8px);
 }
 
 .video-open {
