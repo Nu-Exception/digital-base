@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Base CMS</title>
+  <link rel="stylesheet" href="./admin.css" />
+</head>
+<body>
+  <main class="admin-shell">
+    <section class="admin-hero" id="loginHero">
+      <a class="back-link" href="/">返回前台</a>
+      <p>DIGITAL BASE CMS</p>
+      <h1>网站内容管理后台</h1>
+      <span>管理首页、轮播、动态、留言、视频入口、项目、资源站、书签和朋友空间。</span>
+    </section>
+
+    <section class="panel login-panel" id="loginPanel">
+      <div class="panel-head">
+        <p>LOGIN</p>
+        <h2>管理员登录</h2>
+      </div>
+      <form id="loginForm" class="stack-form">
+        <label>
+          <span>管理员密码</span>
+          <input type="password" id="adminPassword" autocomplete="current-password" required />
+        </label>
+        <button type="submit">进入 CMS</button>
+        <p class="hint" id="loginHint"></p>
+      </form>
+    </section>
+
+    <section class="cms hidden" id="cmsApp">
+      <aside class="cms-sidebar">
+        <div class="cms-brand">
+          <strong>DIGITAL BASE</strong>
+          <span>CMS ONLINE</span>
+        </div>
+        <nav id="cmsNav"></nav>
+      </aside>
+      <section class="cms-main" id="cmsMain"></section>
+    </section>
+  </main>
+
+  <script src="./admin.js"></script>
+</body>
+</html>
