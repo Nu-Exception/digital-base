@@ -3,6 +3,9 @@ const $ = (selector) => document.querySelector(selector);
 let siteData = {};
 let bookmarkCategory = "全部";
 let carouselTimer = null;
+let recentLogItems = [];
+let recentLogIndex = 0;
+let recentLogTimer = null;
 const BOOKMARK_CATEGORIES = ["AI工具", "游戏", "开发", "视频", "素材", "常用"];
 
 async function getData() {
@@ -212,16 +215,82 @@ function renderStatus(data) {
   `).join("");
 }
 
-function renderRecentLog(items) {
-  $("#updates").innerHTML = items.length ? items.slice(0, 5).map((item) => `
-    <div class="update-item">
+function normalizeRecentItem(item = {}) {
+  return {
+    time: item.created_at || item.time || "",
+    title: item.title || item.text || "动态",
+    body: item.body || item.description || item.text || ""
+  };
+}
+
+function stopRecentLogCarousel() {
+  if (recentLogTimer) window.clearInterval(recentLogTimer);
+  recentLogTimer = null;
+}
+
+function startRecentLogCarousel() {
+  stopRecentLogCarousel();
+  if (recentLogItems.length > 1) {
+    recentLogTimer = window.setInterval(() => {
+      renderRecentSlide((recentLogIndex + 1) % recentLogItems.length, false);
+    }, 4000);
+  }
+}
+
+function renderRecentSlide(index = 0, restart = true) {
+  const target = $("#updates");
+  if (!target) return;
+  if (!recentLogItems.length) {
+    stopRecentLogCarousel();
+    target.innerHTML = '<div class="empty-state">暂无动态</div>';
+    return;
+  }
+
+  recentLogIndex = (index + recentLogItems.length) % recentLogItems.length;
+  const item = recentLogItems[recentLogIndex];
+  const hasMultiple = recentLogItems.length > 1;
+  target.innerHTML = `
+    <div class="recent-carousel">
+      <article class="update-item recent-slide">
       <div class="update-top">
-        <strong>${escapeHtml(formatDate(item.created_at || item.time || ""))}</strong>
-        <span>${escapeHtml(item.title || item.text || "动态")}</span>
+          <strong>${escapeHtml(formatDate(item.time))}</strong>
+          <span>${escapeHtml(item.title)}</span>
       </div>
-      <p>${escapeHtml(item.body || item.description || item.text || "")}</p>
+        <p>${escapeHtml(item.body)}</p>
+      </article>
+      ${hasMultiple ? `
+        <div class="recent-controls" aria-label="最近动态轮播控制">
+          <button type="button" class="recent-nav" data-recent-prev aria-label="上一条动态">‹</button>
+          <div class="recent-dots" aria-label="最近动态指示器">
+            ${recentLogItems.map((_, dotIndex) => `
+              <button type="button" class="recent-dot${dotIndex === recentLogIndex ? " active" : ""}" data-recent-index="${dotIndex}" aria-label="第 ${dotIndex + 1} 条动态"></button>
+            `).join("")}
+          </div>
+          <button type="button" class="recent-nav" data-recent-next aria-label="下一条动态">›</button>
     </div>
-  `).join("") : '<div class="empty-state">暂无动态</div>';
+      ` : ""}
+    </div>
+  `;
+
+  target.querySelector("[data-recent-prev]")?.addEventListener("click", () => {
+    renderRecentSlide(recentLogIndex - 1);
+  });
+  target.querySelector("[data-recent-next]")?.addEventListener("click", () => {
+    renderRecentSlide(recentLogIndex + 1);
+  });
+  target.querySelectorAll("[data-recent-index]").forEach((dot) => {
+    dot.addEventListener("click", () => renderRecentSlide(Number(dot.dataset.recentIndex || 0)));
+  });
+
+  target.onmouseenter = stopRecentLogCarousel;
+  target.onmouseleave = startRecentLogCarousel;
+  if (restart) startRecentLogCarousel();
+}
+
+function renderRecentLog(items) {
+  recentLogItems = items.slice(0, 5).map(normalizeRecentItem);
+  recentLogIndex = 0;
+  renderRecentSlide(0);
 }
 
 async function loadRecentLog(data) {
