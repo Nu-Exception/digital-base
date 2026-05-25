@@ -224,15 +224,20 @@ function formatSyncTime(date = new Date()) {
 
 function renderStatusStats(stats = {}) {
   $("#statusList").innerHTML = `
-    <div class="hud-metrics">
+    <div class="hud-chip-grid">
       ${STATUS_STATS.map((item) => `
-        <span>${item.label}：<strong>${Number(stats[item.key] || 0)}</strong></span>
+        <span class="hud-chip">
+          <em>${item.label}</em>
+          <strong>${Number(stats[item.key] || 0)}</strong>
+        </span>
       `).join("")}
     </div>
-    <div class="hud-row">
-      <span>最后同步</span>
-      <strong>${escapeHtml(stats.syncedAt || formatSyncTime())}</strong>
+    <div class="hud-system">
+      <span>SYSTEM STABLE</span>
+      <div class="hud-bar" aria-hidden="true"><i></i></div>
+      <strong>86%</strong>
     </div>
+    <div class="hud-sync">最后同步 ${escapeHtml(stats.syncedAt || formatSyncTime())}</div>
   `;
 }
 

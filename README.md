@@ -540,6 +540,8 @@ MIT
 
 首页 Status Panel 现在是动态统计 HUD：数量来自 `/api/posts`、`/api/projects`、`/api/resources`、`/api/bookmarks`、`/api/messages`，分别显示动态、项目、资源、导航、留言总数；新增或删除内容后刷新页面会自动重新统计，接口异常时对应数字显示 0。
 
+Status Panel 视觉已升级为赛博 HUD 数据芯片样式：动态统计以小型 chip 展示，底部包含 `SYSTEM STABLE` 运行状态条，保持原卡片长宽高，不影响 Recent Log 和 Fast Links。
+
 前台内容整体优先读取 CMS/API，无数据时显示空状态提示，避免继续展示默认占位假数据。
 
 留言板公开接口 `/api/messages` 会兼容 `is_public`、`visible`、`is_visible` 显示字段；后台留言管理点“显示”后，前台刷新或发布留言成功后会重新读取接口。可用 `/api/messages?debug=1` 检查表字段、总数和最近 5 条留言。
