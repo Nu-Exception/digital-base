@@ -609,24 +609,43 @@ function getVideoOpenUrl(video) {
   return video.cover && !isDirectImageUrl(video.cover) ? video.cover : "";
 }
 
+function getYouTubeEmbedUrl(id) {
+  return `https://www.youtube.com/embed/${attr(id)}?autoplay=1&mute=1&playsinline=1&controls=0&rel=0&modestbranding=1`;
+}
+
+function bindVideoPreviewCards() {
+  document.querySelectorAll(".video-card[data-youtube-id]").forEach((card) => {
+    card.addEventListener("mouseenter", () => {
+      if (card.querySelector(".video-preview-frame")) return;
+      const id = card.dataset.youtubeId;
+      if (!id) return;
+      const iframe = document.createElement("iframe");
+      iframe.className = "video-preview-frame";
+      iframe.src = getYouTubeEmbedUrl(id);
+      iframe.title = card.dataset.title || "YouTube preview";
+      iframe.loading = "lazy";
+      iframe.allow = "autoplay; encrypted-media; picture-in-picture";
+      iframe.setAttribute("allowfullscreen", "");
+      card.prepend(iframe);
+      card.classList.add("previewing");
+    });
+    card.addEventListener("mouseleave", () => {
+      card.querySelector(".video-preview-frame")?.remove();
+      card.classList.remove("previewing");
+    });
+  });
+}
+
 function renderVideoList(videos) {
   const normalized = videos.map(normalizeVideo);
-  const mainItem = normalized.find((video) => getVideoOpenUrl(video));
-  const mainUrl = normalizeUrl(mainItem ? getVideoOpenUrl(mainItem) : "");
-  const mainLink = $("#mainVideoLink");
-  if (mainUrl) {
-    mainLink.href = mainUrl;
-  } else {
-    mainLink.removeAttribute("href");
-  }
-  mainLink.hidden = !mainUrl;
   $("#videoRow").innerHTML = normalized.length ? normalized.slice(0, 6).map((video) => {
     const tagA = video.tags[0] || video.category || video.game || "PORTAL";
     const tagB = video.tags[1] || video.length || "LINK";
     const openUrl = getVideoOpenUrl(video);
+    const youtubeId = getYouTubeId(openUrl || video.cover);
     const external = isExternalUrl(openUrl);
     return `
-      <article class="video-card">
+      <article class="video-card"${youtubeId ? ` data-youtube-id="${attr(youtubeId)}" data-title="${attr(video.title)}"` : ""}>
         ${renderVideoCoverHTML(video.cover, video.title)}
         <div class="video-card-content">
           <h3>${escapeHtml(video.title)}</h3>
@@ -640,6 +659,7 @@ function renderVideoList(videos) {
       </article>
     `;
   }).join("") : '<div class="empty-state">暂无视频入口</div>';
+  bindVideoPreviewCards();
 }
 
 async function loadVideos(data) {

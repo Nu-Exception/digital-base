@@ -13,6 +13,7 @@
   --green: #48d597;
   --blue: #6aa7ff;
   --max: 1180px;
+  --site-bg-image: none;
 }
 
 * {
@@ -28,10 +29,16 @@ body {
   min-height: 100vh;
   color: var(--text);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
-  background:
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(180deg, rgba(5, 7, 11, .78), rgba(5, 7, 11, .9)),
+    var(--site-bg-image),
     radial-gradient(circle at top left, rgba(115, 90, 255, .16), transparent 32rem),
     radial-gradient(circle at 88% 12%, rgba(255, 119, 79, .12), transparent 28rem),
     linear-gradient(180deg, #0b0f17 0%, #07090f 48%, #05070b 100%);
+  background-size: auto, cover, auto, auto, auto;
+  background-position: center, center, top left, 88% 12%, center;
+  background-attachment: fixed, fixed, scroll, scroll, scroll;
   overflow-x: hidden;
 }
 
@@ -512,30 +519,29 @@ footer {
 }
 
 .portal {
-  padding-top: 8px;
+  padding-top: 18px;
 }
 
 .video-row {
   display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 230px;
-  gap: 14px;
-  overflow-x: auto;
-  padding: 2px 2px 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  overflow: visible;
+  padding: 4px 2px 10px;
   scrollbar-color: rgba(255, 255, 255, .24) transparent;
 }
 
 .video-card {
   position: relative;
   display: flex;
-  min-height: 142px;
+  min-height: 245px;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 8px;
   background-image: linear-gradient(180deg, rgba(4, 6, 10, .05), rgba(4, 6, 10, .9) 78%), var(--cover);
   background-size: cover;
   background-position: center;
-  transition: transform .18s ease, border-color .18s ease;
+  transition: transform .18s ease, border-color .18s ease, box-shadow .18s ease;
 }
 
 .video-card::after {
@@ -552,6 +558,16 @@ footer {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform .28s ease, opacity .18s ease;
+}
+
+.video-preview-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 
 .video-cover-placeholder {
@@ -566,6 +582,7 @@ footer {
     radial-gradient(circle at 28% 22%, rgba(250, 204, 21, .2), transparent 32%),
     radial-gradient(circle at 78% 10%, rgba(53, 246, 111, .16), transparent 30%),
     linear-gradient(135deg, rgba(7, 12, 22, .98), rgba(21, 28, 42, .88));
+  transition: transform .28s ease, opacity .18s ease;
 }
 
 .video-cover-placeholder::before {
@@ -641,12 +658,32 @@ footer {
   border-color: rgba(255, 255, 255, .24);
 }
 
+.video-card:hover {
+  border-color: rgba(250, 204, 21, .45);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, .32), 0 0 0 1px rgba(250, 204, 21, .12);
+}
+
+.video-card:hover .video-cover,
+.video-card:hover .video-cover-placeholder {
+  transform: scale(1.035);
+}
+
+.video-card.previewing .video-cover,
+.video-card.previewing .video-cover-placeholder {
+  opacity: 0;
+}
+
+.video-card:hover .video-cover-play {
+  border-color: rgba(250, 204, 21, .66);
+  box-shadow: 0 0 26px rgba(250, 204, 21, .34);
+}
+
 .video-card-content {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   align-self: flex-end;
   width: 100%;
-  padding: 12px;
+  padding: 16px;
 }
 
 .video-open {
@@ -655,13 +692,13 @@ footer {
 
 .video-card h3 {
   margin: 0 0 7px;
-  font-size: 15px;
+  font-size: 18px;
 }
 
 .video-card p {
   margin: 0;
   color: #c7d0dd;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.45;
 }
 
@@ -1481,7 +1518,7 @@ footer strong {
   }
 
   .video-row {
-    grid-auto-columns: 78vw;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .hud-chip-grid {
@@ -1489,6 +1526,12 @@ footer strong {
   }
 
   .message {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 560px) {
+  .video-row {
     grid-template-columns: 1fr;
   }
 }
