@@ -140,11 +140,6 @@ function applySiteSettings(data, settings = {}) {
       secondaryLabel: settings.hero_secondary_button_text || hero.secondaryLabel,
       secondaryUrl: settings.hero_secondary_button_link || hero.secondaryUrl
     },
-    mini: {
-      ...(data.mini || {}),
-      current: settings.hero_status_title || data.mini?.current,
-      next: settings.hero_status_description || data.mini?.next
-    },
     status: {
       ...(data.status || {}),
       title: settings.hero_status_title || data.status?.title,
@@ -167,8 +162,6 @@ function setHero(data) {
   $("#heroPrimary").href = hero.primaryUrl || "#bookmarks";
   $("#heroSecondary").textContent = hero.secondaryLabel || "打开视频入口";
   $("#heroSecondary").href = hero.secondaryUrl || "#portal";
-  $("#miniCurrent").textContent = data.mini?.current || "Digital Base";
-  $("#miniNext").textContent = data.mini?.next || "Cloudflare Pages";
 }
 
 function cssUrl(value = "") {
@@ -975,15 +968,6 @@ function bindMobileMenu() {
   });
 }
 
-function bindBaseMode() {
-  let calm = false;
-  $("#soundBtn").addEventListener("click", () => {
-    calm = !calm;
-    document.body.classList.toggle("calm-mode", calm);
-    $("#soundBtn").textContent = calm ? "CALM MODE" : "BASE MODE";
-  });
-}
-
 function setActiveAnchors() {
   const links = [...document.querySelectorAll(".site-nav a, .float-menu a")];
   const sections = links
@@ -1029,7 +1013,6 @@ getData()
     setFloatMenu();
     bindMobileMenu();
     bindMessageForm();
-    bindBaseMode();
     setActiveAnchors();
     checkLocalLinks();
   })

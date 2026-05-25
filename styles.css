@@ -47,14 +47,6 @@ body.nav-open {
   overflow-x: hidden;
 }
 
-body.calm-mode .page-glow {
-  opacity: .35;
-}
-
-body.calm-mode .grain {
-  opacity: .02;
-}
-
 a {
   color: inherit;
   text-decoration: none;
@@ -174,7 +166,6 @@ button {
   transform: scaleX(1);
 }
 
-.sound-btn,
 .menu-toggle,
 .btn,
 .bookmark-filter button {
@@ -182,15 +173,6 @@ button {
   background: rgba(255, 255, 255, .055);
   color: #edf3fb;
   cursor: pointer;
-}
-
-.sound-btn {
-  flex: 0 0 auto;
-  border-radius: 8px;
-  padding: 9px 12px;
-  font-size: 12px;
-  font-weight: 850;
-  letter-spacing: .04em;
 }
 
 .menu-toggle {
@@ -433,36 +415,6 @@ footer {
 .btn.compact {
   min-height: 38px;
   padding: 8px 12px;
-  font-size: 13px;
-}
-
-.hero-status-card {
-  position: absolute;
-  z-index: 2;
-  right: 24px;
-  bottom: 24px;
-  display: grid;
-  gap: 4px;
-  width: 230px;
-  padding: 15px;
-  border: 1px solid rgba(255, 255, 255, .14);
-  border-radius: 8px;
-  background: rgba(12, 16, 24, .68);
-  backdrop-filter: blur(12px);
-}
-
-.hero-status-card small {
-  color: var(--green);
-  font-size: 11px;
-  font-weight: 900;
-}
-
-.hero-status-card strong {
-  font-size: 17px;
-}
-
-.hero-status-card span {
-  color: var(--muted);
   font-size: 13px;
 }
 
@@ -1451,7 +1403,6 @@ footer strong {
   }
 
   .brand small,
-  .sound-btn,
   .float-menu {
     display: none;
   }
@@ -1501,23 +1452,16 @@ footer strong {
 
   .hero-content {
     width: 100%;
-    padding: 50px 24px 120px;
+    padding: 50px 24px 92px;
   }
 
   .hero-lead {
     font-size: 15px;
   }
 
-  .hero-status-card {
-    left: 24px;
-    right: 24px;
-    bottom: 22px;
-    width: auto;
-  }
-
   .dots {
     left: 24px;
-    bottom: 104px;
+    bottom: 28px;
   }
 
   .inline-head,
