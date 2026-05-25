@@ -137,7 +137,7 @@ function applySiteSettings(data, settings = {}) {
       title: settings.hero_status_title || data.status?.title,
       text: settings.hero_status_description || data.status?.text
     },
-    heroBackgroundImage: settings.hero_background_image || ""
+    siteBackgroundImage: settings.background_image || settings.hero_background_image || data.siteBackgroundImage || ""
   };
 }
 
@@ -158,6 +158,15 @@ function setHero(data) {
   $("#miniNext").textContent = data.mini?.next || "Cloudflare Pages";
 }
 
+function cssUrl(value = "") {
+  return String(value).replaceAll("\\", "\\\\").replaceAll('"', '\\"');
+}
+
+function setSiteBackground(data) {
+  const image = normalizeUrl(data.siteBackgroundImage || data.backgroundImage || "");
+  document.documentElement.style.setProperty("--site-bg-image", image ? `url("${cssUrl(image)}")` : "none");
+}
+
 function normalizeSlide(slide) {
   return {
     image: slide.image,
@@ -170,9 +179,7 @@ function normalizeSlide(slide) {
 }
 
 async function loadSlides(data) {
-  const fallback = data.heroBackgroundImage
-    ? [{ image: data.heroBackgroundImage }, ...(data.heroSlides || [])]
-    : (data.heroSlides || []);
+  const fallback = data.heroSlides || [];
   return tryApi("/api/hero-slides", fallback, (result) => {
     const slides = (result.slides || []).map(normalizeSlide).filter((slide) => slide.image);
     return slides.length ? slides : fallback;
@@ -953,6 +960,7 @@ function checkLocalLinks() {
 getData()
   .then(async (data) => {
     siteData = await loadSiteSettings(data);
+    setSiteBackground(siteData);
     setHero(siteData);
     setCarousel(await loadSlides(siteData));
     renderStatus(siteData);

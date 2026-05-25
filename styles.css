@@ -38,6 +38,7 @@ body {
     linear-gradient(180deg, #0b0f17 0%, #07090f 48%, #05070b 100%);
   background-size: auto, cover, auto, auto, auto;
   background-position: center, center, top left, 88% 12%, center;
+  background-repeat: no-repeat, no-repeat, no-repeat, no-repeat, no-repeat;
   background-attachment: fixed, fixed, scroll, scroll, scroll;
   overflow-x: hidden;
 }

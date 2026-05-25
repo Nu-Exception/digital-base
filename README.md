@@ -527,6 +527,8 @@ MIT
 
 全站支持背景图能力：在 `styles.css` 的 `:root` 中修改 `--site-bg-image`，例如 `--site-bg-image: url("https://example.com/bg.webp");`。背景会使用 `cover / center / fixed` 显示，并叠加暗色遮罩；保持 `none` 时继续使用原来的暗色渐变背景。
 
+后台“首页设置”的背景图链接现在控制全站底层背景，也就是页面左右两侧和内容底层背景；它不会再替换 Hero 横幅或轮播图。Hero 图片继续由轮播管理 `/api/hero-slides` 或 `data/site.json` 的 `heroSlides` 控制。
+
 视频传送门已放大为更突出的首页模块：桌面端按 3 列展示大卡片，移动端自动收缩；视频区右上角“进入完整项目”按钮已移除。YouTube 视频链接支持鼠标悬停时尝试静音自动预览，移出后恢复封面；B站和其它视频链接保留封面缩放、播放图标高亮和暗色光效。
 
 `data/site.json` 现在只作为 API 失败或数据库暂无内容时的 fallback。
